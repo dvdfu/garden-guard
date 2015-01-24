@@ -25,7 +25,6 @@ public class Cell {
 		soilTop = new SpriteComponent(Consts.atlas.findRegion("soil_top"));
 		sprout = new SpriteComponent(Consts.atlas.findRegion("sprout"));
 		tree = new SpriteComponent(Consts.atlas.findRegion("tree"));
-		tree.setOrigin(8, 0);
 		state = State.EMPTY;
 	}
 	
@@ -72,6 +71,7 @@ public class Cell {
 			} else {
 				tree.setImage(Consts.atlas.findRegion("tree_red"));
 			}
+			tree.setOrigin(8, 0);
 			break;
 		default:
 			break;

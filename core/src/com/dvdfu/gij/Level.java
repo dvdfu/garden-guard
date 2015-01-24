@@ -2,11 +2,14 @@ package com.dvdfu.gij;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.dvdfu.gij.components.GamepadComponent;
+import com.dvdfu.gij.components.SpriteComponent;
 
 public class Level {
 	enum State {
-		ROUND_TEXT, GET_READY_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING
+		ROUND_TEXT, GET_READY_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING, COUNTING
 	}
 	State state;
 	int stateTimer;
@@ -18,6 +21,11 @@ public class Level {
 	Cell[] cells;
 	GamepadComponent gp;
 	Text screenLabel;
+	Text incLabel;
+	SpriteComponent instr;
+	
+	Array<Water> water;
+	Pool<Water> waterPool;
 
 	public Level() {
 		p1 = new Player(this, 1);
@@ -25,6 +33,8 @@ public class Level {
 		pT = p1;
 		screenLabel = new Text();
 		screenLabel.centered = true;
+		incLabel = new Text("+1");
+		incLabel.centered = true;
 //		screenLabel.font.scale(1);
 //		screenLabel.bordered = false;
 		cells = new Cell[width];
@@ -34,10 +44,38 @@ public class Level {
 		turn = 1;
 		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
+		
+		water = new Array<Water>();
+		waterPool = new Pool<Water>() {
+			protected Water newObject() {
+				return new Water();
+			}
+		};
+		instr = new SpriteComponent(Consts.atlas.findRegion("instr"));
 	}
 	
 	public void switchState(State state) {
 		switch (state) {
+		case COUNTING:
+			boolean fruit = false;
+			Cell cell;
+			for (int i = 0; i < width; i++) {
+				cell = cells[i];
+				if (cell.state == Cell.State.TREE) {
+					fruit = true;
+					if (cell.owner.equals(p1)) {
+						p1.fruit++;
+					} else {
+						p2.fruit++;
+					}
+				}
+			}
+			if (fruit) {
+				stateTimer = 120;
+			} else {
+				switchState(State.ROUND_TEXT);
+			}
+			break;
 		case GET_READY_TEXT:
 			stateTimer = 60;
 			screenLabel.text = "Get Ready...";
@@ -67,6 +105,9 @@ public class Level {
 	
 	public void handleState() {
 		switch (state) {
+		case COUNTING:
+			handleTimer();
+			break;
 		case GET_READY_TEXT:
 			handleTimer();
 			break;
@@ -83,7 +124,7 @@ public class Level {
 			}
 			if (p1.actionQueue.isEmpty() && p2.actionQueue.isEmpty() && p1.ready && p2.ready) {
 				turn++;
-				switchState(State.ROUND_TEXT);
+				switchState(State.COUNTING);
 				return;
 			}
 			break;
@@ -110,6 +151,9 @@ public class Level {
 	
 	public void timeUp() {
 		switch (state) {
+		case COUNTING:
+			switchState(State.ROUND_TEXT);
+			break;
 		case GET_READY_TEXT:
 			switchState(State.QUEUING);
 			break;
@@ -132,6 +176,14 @@ public class Level {
 
 	public void update() {
 		handleState();
+		for (int i = 0; i < water.size; i++) {
+			water.get(i).update();
+			if (water.get(i).dead) {
+				waterPool.free(water.get(i));
+				water.removeIndex(i);
+				i--;
+			}
+		}
 		p1.update();
 		p2.update();
 		gp.update();
@@ -184,6 +236,24 @@ public class Level {
 		}
 		for (int i = 0; i < width; i++) {
 			cells[i].draw(batch);
+		}
+		if (state == State.COUNTING) {
+			for (int i = 0; i < width; i++) {
+				if (cells[i].state == Cell.State.TREE) {
+					if (cells[i].owner.equals(p1)) {
+						incLabel.color.set(0.5f, 1, 0.7f, 1);
+					} else {
+						incLabel.color.set(1, 0.7f, 0.5f, 1);
+					}
+					incLabel.draw(batch, Consts.width / 2 + (i + 0.5f - width / 2) * 32, 176);
+				}
+			}
+		}
+		if (state == State.QUEUING) {
+			// instr.drawCentered(batch, Consts.width / 2, Consts.height / 2);
+		}
+		for (Water w : water) {
+			w.draw(batch);
 		}
 		p1.draw(batch);
 		p2.draw(batch);

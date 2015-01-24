@@ -48,9 +48,9 @@ public class Player {
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
 		if (player == 1) {
-			sprite.setColor(0.7f, 1, 0.8f);
+			sprite.setColor(0.5f, 1, 0.7f);
 		} else {
-			sprite.setColor(1, 0.8f, 0.7f);
+			sprite.setColor(1, 0.7f, 0.5f);
 		}
 		menuTray = new SpriteComponent(Consts.atlas.findRegion("test"));
 		menuTray.setSize(28, 200);
@@ -67,13 +67,13 @@ public class Player {
 		t.centered = true;
 		keyRight = GamepadComponent.Button.RIGHT;
 		keyLeft = GamepadComponent.Button.LEFT;
-		keySprout = GamepadComponent.Button.CIR;
+		keySprout = GamepadComponent.Button.TRI;
 		keyAxe = GamepadComponent.Button.CRO;
-		keyWater = GamepadComponent.Button.TRI;
+		keyWater = GamepadComponent.Button.CIR;
 		keyUndo = GamepadComponent.Button.L;
 		keyReady = GamepadComponent.Button.R;
 		actionCurrent = Actions.NULL;
-		xCell = player == 1 ? 1 : level.width - 2;
+		xCell = player == 1 ? 3 : level.width - 4;
 		x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 	}
 	
@@ -134,6 +134,7 @@ public class Player {
 	}
 	
 	public void removeMove() {
+		if (ready) return;
 		if (actionQueue.isEmpty()) return;
 		actionQueue.removeLast();
 	}
@@ -145,19 +146,16 @@ public class Player {
 	public void startAction(Actions action) {
 		ready = false;
 		actionCurrent = action;
+		Cell cell = level.cells[xCell];
 		switch (action) {
 		case AXE:
-			level.switchPlayer();
-			ready = true;
+			timer = moveTime;
 			break;
 		case WATER:
-			if (level.cells[xCell].state == Cell.State.SPROUT) {
-				level.cells[xCell].setState(this, Cell.State.TREE);
-			}
 			timer = moveTime;
 			break;
 		case SPROUT:
-			level.cells[xCell].setState(this, Cell.State.SPROUT);
+			cell.setState(this, Cell.State.SPROUT);
 			timer = moveTime;
 			break;
 		case MOVE_LEFT:
@@ -176,11 +174,28 @@ public class Player {
 	}
 	
 	public void handleAction() {
+		Cell cell = level.cells[xCell];
 		switch (actionCurrent) {
-		case AXE:
-			break;
 		case WATER:
 			if (timer == 0) {
+				if (cell.state == Cell.State.SPROUT) {
+					cell.setState(cell.owner, Cell.State.TREE);
+				}
+				level.switchPlayer();
+				ready = true;
+			} else {
+				timer--;
+				Water w = level.waterPool.obtain();
+				w.x = x + 8 + MathUtils.random(16);
+				w.y = 192;
+				level.water.add(w);
+			}
+			break;
+		case AXE:
+			if (timer == 0) {
+				if (cell.state == Cell.State.TREE) {
+					cell.setState(this, Cell.State.EMPTY);
+				}
 				level.switchPlayer();
 				ready = true;
 			} else {
@@ -227,40 +242,45 @@ public class Player {
 	public void draw(SpriteBatch batch) {
 		int xOffset = player == 1? 100: Consts.width - 100;
 		if (player == 1 && xCell == level.p2.xCell) {
-			sprite.draw(batch, x, 160 + 16);
+			sprite.draw(batch, x, 192 + 16);
 		} else {
-			sprite.draw(batch, x, 160);
+			sprite.draw(batch, x, 192);
 		}
 		
 		int yOffset = (level.turn + 2) * 26 + 2 ;
 		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - yOffset);
+		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
+			t.draw(batch, xOffset, Consts.height - yOffset - 16);
+		}
+		
+		for (int i = 2; i < level.turn + 2; i++) {
+			iconSelected.draw(batch, xOffset - iconSelected.getWidth() / 2, Consts.height - 2 - iconSelected.getHeight() - i * 26);
+		}
 		
 		for (int i = 0; i < actionQueue.size(); i++) {
 			SpriteComponent icon = iconUnknown;
-			switch (actionQueue.get(i)) {
-			case AXE:
-				icon = iconAxe;
-				break;
-			case WATER:
-				icon = iconWater;
-				break;
-			case SPROUT:
-				icon = iconSprout;
-				break;
-			case MOVE_LEFT:
-				icon = iconMoveLeft;
-				break;
-			case MOVE_RIGHT:
-				icon = iconMoveRight;
-				break;
-			default:
-				break;
+			if (level.state == Level.State.PERFORMING || i < 2) {
+				switch (actionQueue.get(i)) {
+				case AXE:
+					icon = iconAxe;
+					break;
+				case WATER:
+					icon = iconWater;
+					break;
+				case SPROUT:
+					icon = iconSprout;
+					break;
+				case MOVE_LEFT:
+					icon = iconMoveLeft;
+					break;
+				case MOVE_RIGHT:
+					icon = iconMoveRight;
+					break;
+				default:
+					break;
+				}
 			}
 			icon.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight() - i * 26);
-		}
-		
-		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
-			t.draw(batch, xOffset, 160);
 		}
 	}
 }
