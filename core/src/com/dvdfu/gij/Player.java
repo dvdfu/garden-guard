@@ -2,7 +2,6 @@ package com.dvdfu.gij;
 
 import java.util.LinkedList;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.dvdfu.gij.components.GamepadComponent;
@@ -10,14 +9,20 @@ import com.dvdfu.gij.components.GamepadComponent.Button;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Player {
+	Level level;
 	enum Actions {
 		MOVE_LEFT, MOVE_RIGHT, AXE, WATER, SPROUT, NULL
 	}
 	boolean ready;
-	boolean doneMoves;
 	LinkedList<Actions> actionQueue;
 	Actions actionCurrent;
-	Level level;
+	int timer;
+	int xCell;
+	float x;
+	int player;
+	int fruit;
+	final int moveTime = 30;
+	
 	SpriteComponent sprite;
 	SpriteComponent menuTray;
 	SpriteComponent iconUnknown;
@@ -27,11 +32,6 @@ public class Player {
 	SpriteComponent iconSelected;
 	SpriteComponent iconWater;
 	SpriteComponent iconAxe;
-	int xCell;
-	float x;
-	int timer;
-	int player;
-	int fruit;
 	
 	Button keyRight;
 	Button keyLeft;
@@ -40,6 +40,7 @@ public class Player {
 	Button keyWater;
 	Button keyUndo;
 	Button keyReady;
+	
 	Text t;
 	
 	public Player(Level level, int player) {
@@ -73,11 +74,10 @@ public class Player {
 		keyReady = GamepadComponent.Button.R;
 		actionCurrent = Actions.NULL;
 		xCell = player == 1 ? 0 : 6;
-		x = Gdx.graphics.getWidth() / 4 + (xCell - level.width / 2f) * 32;
+		x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 	}
 	
 	public void update() {
-		System.out.println(actionQueue);
 		t.text = "P" + player + " Ready!";
 		switch (level.state) {
 		case GET_READY_TEXT:
@@ -85,7 +85,7 @@ public class Player {
 		case GARDEN_TEXT:
 			break;
 		case PERFORMING:
-			handleAction();
+			if (!ready) handleAction();
 			break;
 		case QUEUING:
 			handleInput();
@@ -118,50 +118,59 @@ public class Player {
 		if (level.gp.keyPressed(player - 1, keyUndo)) {
 			removeMove();
 		}
-		if (doneMoves && level.gp.keyPressed(player - 1, keyReady)) {
+		if (doneMoves() && level.gp.keyPressed(player - 1, keyReady)) {
 			ready = true;
 		}
 	}
 	
 	public void newRound() {
 		ready = false;
-		doneMoves = false;
 		actionQueue.clear();
 	}
 	
 	public void addMove(Actions move) {
-		if (doneMoves) return;
+		if (doneMoves()) return;
 		actionQueue.add(move);
-		if (actionQueue.size() == level.turn + 2) {
-			doneMoves = true;
-		}
 	}
 	
 	public void removeMove() {
 		if (actionQueue.isEmpty()) return;
 		actionQueue.removeLast();
-		doneMoves = actionQueue.size() == level.turn + 2;
+	}
+	
+	public boolean doneMoves() {
+		return actionQueue.size() == level.turn + 2;
 	}
 	
 	public void startAction(Actions action) {
 		ready = false;
+		actionCurrent = action;
 		switch (action) {
 		case AXE:
+			level.switchPlayer();
+			ready = true;
 			break;
 		case WATER:
+			level.switchPlayer();
+			ready = true;
 			break;
 		case SPROUT:
+			level.switchPlayer();
+			ready = true;
 			break;
 		case MOVE_LEFT:
-			timer = 30;
+			timer = moveTime;
 			break;
 		case MOVE_RIGHT:
-			timer = 30;
+			timer = moveTime;
+			break;
+		case NULL:
+			level.switchPlayer();
+			ready = true;
 			break;
 		default:
 			break;
 		}
-		actionCurrent = action;
 	}
 	
 	public void handleAction() {
@@ -174,24 +183,26 @@ public class Player {
 			break;
 		case MOVE_LEFT:
 			if (timer == 0) {
-				level.finishPerform();
+				level.switchPlayer();
 				ready = true;
 				xCell--;
+				x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 			} else {
 				timer--;
-				float tx = MathUtils.lerp(xCell, xCell - 1, (60 - timer) / 60f);
-				x = Gdx.graphics.getWidth() / 4 + (tx - level.width / 2f) * 32;
+				float tx = MathUtils.lerp(xCell, xCell - 1, 1f * (moveTime - timer) / moveTime);
+				x = Consts.width / 2 + (tx - level.width / 2f) * 32;
 			}
 			break;
 		case MOVE_RIGHT:
 			if (timer == 0) {
-				level.finishPerform();
+				level.switchPlayer();
 				ready = true;
 				xCell++;
+				x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 			} else {
 				timer--;
-				float tx = MathUtils.lerp(xCell, xCell + 1, (60 - timer) / 60f);
-				x = Gdx.graphics.getWidth() / 4 + (tx - level.width / 2f) * 32;
+				float tx = MathUtils.lerp(xCell, xCell + 1, 1f * (moveTime - timer) / moveTime);
+				x = Consts.width / 2 + (tx - level.width / 2f) * 32;
 			}
 			break;
 		default:
@@ -227,9 +238,9 @@ public class Player {
 				break;
 			}
 			icon.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight() - i * 26);
-			if (level.playerTurn.equals(this)) {
-				iconSelected.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight());
-			}
+//			if (level) {
+//				iconSelected.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight());
+//			}
 		}
 		
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {

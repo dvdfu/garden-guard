@@ -3,7 +3,6 @@ package com.dvdfu.gij;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.components.GamepadComponent;
-import com.dvdfu.gij.components.SpriteComponent;
 
 public class Level {
 	enum State {
@@ -13,9 +12,9 @@ public class Level {
 	int stateTimer;
 	final int width = 10;
 	int turn;
-	Player playerTurn;
 	Player p1;
 	Player p2;
+	Player pT;
 	Cell[] cells;
 	GamepadComponent gp;
 	Text screenLabel;
@@ -23,16 +22,16 @@ public class Level {
 	public Level() {
 		p1 = new Player(this, 1);
 		p2 = new Player(this, 2);
+		pT = p1;
 		screenLabel = new Text();
 		screenLabel.centered = true;
-		screenLabel.font.scale(1);
-		screenLabel.bordered = false;
+//		screenLabel.font.scale(1);
+//		screenLabel.bordered = false;
 		cells = new Cell[width];
 		for (int i = 0; i < width; i++) {
 			cells[i] = new Cell(this, i);
 		}
 		turn = 1;
-		playerTurn = p1;
 		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
 	}
@@ -48,7 +47,7 @@ public class Level {
 			screenLabel.text = "Garden!";
 			break;
 		case PERFORMING:
-			stateTimer = 30;
+			stateTimer = 0;
 			break;
 		case QUEUING:
 			break;
@@ -64,6 +63,50 @@ public class Level {
 			break;
 		}
 		this.state = state;
+	}
+	
+	public void handleState() {
+		switch (state) {
+		case GET_READY_TEXT:
+			handleTimer();
+			break;
+		case GARDEN_TEXT:
+			handleTimer();
+			break;
+		case PERFORMING:
+			if (pT.ready) {
+				if (pT.actionQueue.isEmpty()) {
+					switchPlayer();
+				} else {
+					perform(pT, pT.actionQueue.removeFirst());
+					System.out.println("p " + stateTimer);
+				}
+			}
+			if (p1.actionQueue.isEmpty() && p2.actionQueue.isEmpty() && p1.ready && p2.ready) {
+				turn++;
+				switchState(State.ROUND_TEXT);
+				return;
+			}
+			break;
+		case QUEUING:
+			if (p1.ready && p2.ready) switchState(State.GARDEN_TEXT);
+			break;
+		case ROUND_TEXT:
+			handleTimer();
+			break;
+		case WAITING:
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void handleTimer() {
+		if (stateTimer > 0) {
+			stateTimer--;
+		} else {
+			timeUp();
+		}
 	}
 	
 	public void timeUp() {
@@ -89,24 +132,7 @@ public class Level {
 	}
 
 	public void update() {
-		if (stateTimer > 0) {
-			stateTimer--;
-		} else {
-			timeUp();
-		}
-		if (state == State.QUEUING) {
-			if (p1.ready && p2.ready) switchState(State.GARDEN_TEXT);
-		}
-		if (state == State.PERFORMING) {
-			if (playerTurn.ready) {
-				if (!playerTurn.actionQueue.isEmpty()) {
-					perform(playerTurn, playerTurn.actionQueue.removeFirst());
-				} else {
-					turn++;
-					switchState(State.ROUND_TEXT);
-				}
-			}
-		}
+		handleState();
 		p1.update();
 		p2.update();
 		gp.update();
@@ -120,14 +146,14 @@ public class Level {
 			if (player.xCell > 0) {
 				player.startAction(action);
 			} else {
-				player.startAction(Player.Actions.NULL);
+				stateTimer++;
 			}
 			break;
 		case MOVE_RIGHT:
 			if (player.xCell < width - 1) {
 				player.startAction(action);
 			} else {
-				player.startAction(Player.Actions.NULL);
+				stateTimer++;
 			}
 			break;
 		case NULL:
@@ -141,8 +167,12 @@ public class Level {
 		}
 	}
 	
-	public void finishPerform() {
-		playerTurn = playerTurn.equals(p1)? p2 : p1;
+	public void switchPlayer() {
+		if (pT.equals(p1)) {
+			pT = p2;
+			return;
+		}
+		pT = p1;
 	}
 
 	public void draw(SpriteBatch batch) {
