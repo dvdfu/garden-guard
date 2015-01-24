@@ -58,6 +58,14 @@ public class SpriteComponent {
 		draw(batch, x - originX, y - originY);
 	}
 	
+	public float getWidth() {
+		return width;
+	}
+	
+	public float getHeight() {
+		return height;
+	}
+	
 	public void setAlpha(float alpha) {
 		this.alpha = alpha;
 	}

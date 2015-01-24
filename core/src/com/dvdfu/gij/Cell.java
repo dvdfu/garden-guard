@@ -5,8 +5,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Cell {
+	enum State {
+		EMPTY, SPROUT,
+	}
+	State state;
 	Level level;
 	int x;
+	Player owner;
 	
 	SpriteComponent soil;
 	SpriteComponent soilTop;
@@ -16,6 +21,7 @@ public class Cell {
 		this.x = x;
 		soil = new SpriteComponent(Consts.atlas.findRegion("soil"));
 		soilTop = new SpriteComponent(Consts.atlas.findRegion("soil_top"));
+		state = State.EMPTY;
 	}
 	
 	public void draw(SpriteBatch batch) {

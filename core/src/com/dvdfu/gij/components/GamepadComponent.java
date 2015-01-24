@@ -30,8 +30,8 @@ public class GamepadComponent implements ControllerListener{
 		map = new HashMap<Controller, Device>();
 		for (Controller c : Controllers.getControllers()) {
 			map.put(c, new Device());
-			Controllers.addListener(this);
 		}
+		Controllers.addListener(this);
 	}
 	
 	public void update() {
@@ -60,8 +60,13 @@ public class GamepadComponent implements ControllerListener{
 		return !map.get(c).keys[button.ordinal()] && map.get(c).preKeys[button.ordinal()];
 	}
 
-	public void connected(Controller controller) {}
-	public void disconnected(Controller controller) {}
+	public void connected(Controller controller) {
+		map.put(controller, new Device());
+		Controllers.addListener(this);
+	}
+	public void disconnected(Controller controller) {
+		map.remove(controller);
+	}
 
 	public boolean buttonDown(Controller controller, int buttonCode) {
 		Device d = map.get(controller);
