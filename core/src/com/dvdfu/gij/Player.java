@@ -9,15 +9,21 @@ import com.dvdfu.gij.components.SpriteComponent;
 
 public class Player {
 	enum Actions {
-		MOVE_LEFT, MOVE_RIGHT, ATTACK_LEFT, ATTACK_RIGHT, FOCUS, GUARD
+		MOVE_LEFT, MOVE_RIGHT, ATTACK_LEFT, ATTACK_RIGHT, FOCUS, GUARD, NULL
 	}
 	boolean ready;
 	boolean doneMoves;
 	LinkedList<Actions> moveQueue;
+	Actions movePerform;
 	Level level;
 	SpriteComponent sprite;
 	SpriteComponent iconUnknown;
+	SpriteComponent iconMove;
+	SpriteComponent iconGuard;
+	SpriteComponent iconFocus;
+	SpriteComponent iconAttack;
 	int xCell;
+	float x;
 	int timer;
 	int player;
 	
@@ -35,6 +41,10 @@ public class Player {
 		this.level = level;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("player"));
 		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
+		iconMove = new SpriteComponent(Consts.atlas.findRegion("icon_move"));
+		iconGuard = new SpriteComponent(Consts.atlas.findRegion("icon_guard"));
+		iconFocus = new SpriteComponent(Consts.atlas.findRegion("icon_focus"));
+		iconAttack = new SpriteComponent(Consts.atlas.findRegion("icon_attack"));
 		moveQueue = new LinkedList<Actions>();
 		t = new Text();
 		t.centered = true;
@@ -107,11 +117,49 @@ public class Player {
 		doneMoves = moveQueue.size() == level.turn + 2;
 	}
 	
+	public void perform(Actions action) {
+		switch (action) {
+		case ATTACK_LEFT:
+			break;
+		case ATTACK_RIGHT:
+			break;
+		case FOCUS:
+			break;
+		case GUARD:
+			break;
+		case MOVE_LEFT:
+			break;
+		case MOVE_RIGHT:
+			break;
+		default:
+			break;
+		}
+	}
+	
 	public void draw(SpriteBatch batch) {
 		int xOffset = player == 1? 0: 200;
-		sprite.draw(batch, xCell * 32, 16);
+		sprite.draw(batch, x, 16);
 		for (int i = 0; i < moveQueue.size(); i++) {
-			iconUnknown.draw(batch, xOffset, 160 - i * 16);
+			SpriteComponent icon = iconUnknown;
+			switch (moveQueue.get(i)) {
+			case ATTACK_LEFT:
+			case ATTACK_RIGHT:
+				icon = iconAttack;
+				break;
+			case FOCUS:
+				icon = iconFocus;
+				break;
+			case GUARD:
+				icon = iconGuard;
+				break;
+			case MOVE_LEFT:
+			case MOVE_RIGHT:
+				icon = iconMove;
+				break;
+			default:
+				break;
+			}
+			icon.draw(batch, xOffset, 160 - i * 16);
 		}
 		
 		if (ready) {
