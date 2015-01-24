@@ -1,54 +1,68 @@
 
 images.png
-size: 128,32
+size: 128,64
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-icon_attack
+iconSprout
   rotate: false
   xy: 2, 2
-  size: 16, 16
-  orig: 16, 16
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
-icon_focus
+icon_sprout
   rotate: false
-  xy: 20, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 2, 2
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
-icon_guard
+icon_move_left
   rotate: false
-  xy: 38, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 70, 36
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
-icon_move
+icon_move_right
   rotate: false
-  xy: 56, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 28, 2
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
 icon_unknown
   rotate: false
-  xy: 74, 2
-  size: 16, 16
-  orig: 16, 16
+  xy: 96, 36
+  size: 24, 24
+  orig: 24, 24
   offset: 0, 0
   index: -1
 player
   rotate: false
-  xy: 92, 2
+  xy: 54, 10
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
+soil
+  rotate: false
+  xy: 2, 28
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+soil_top
+  rotate: false
+  xy: 36, 28
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 test
   rotate: false
-  xy: 110, 2
+  xy: 72, 18
   size: 16, 16
   orig: 16, 16
   offset: 0, 0

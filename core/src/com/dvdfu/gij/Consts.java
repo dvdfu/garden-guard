@@ -7,7 +7,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class Consts {
 	public static TextureAtlas atlas;
-	public static final BitmapFont Test = new BitmapFont(Gdx.files.internal("data/test.fnt"));
+	public static final BitmapFont BigFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
+	public static final BitmapFont SmallFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
 
 	public Consts() {
 		AssetManager manager = new AssetManager();

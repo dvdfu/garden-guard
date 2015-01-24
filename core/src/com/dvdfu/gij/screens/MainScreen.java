@@ -15,7 +15,7 @@ public class MainScreen extends AbstractScreen {
 		super(game);
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.position.set(120, 80, 0);
+		camera.position.set(Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 4, 0);
 		level = new Level();
 	}
 

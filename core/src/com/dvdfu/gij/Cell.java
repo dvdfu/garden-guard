@@ -1,5 +1,6 @@
 package com.dvdfu.gij;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.components.SpriteComponent;
 
@@ -7,17 +8,25 @@ public class Cell {
 	Level level;
 	int x;
 	
-	SpriteComponent sprite;
+	SpriteComponent soil;
+	SpriteComponent soilTop;
 	
 	public Cell(Level level, int x) {
 		this.level = level;
 		this.x = x;
-		sprite = new SpriteComponent(Consts.atlas.findRegion("test"));
-		
+		soil = new SpriteComponent(Consts.atlas.findRegion("soil"));
+		soilTop = new SpriteComponent(Consts.atlas.findRegion("soil_top"));
 	}
 	
 	public void draw(SpriteBatch batch) {
-		sprite.setColor(1, 1, 1);
-		sprite.draw(batch, x * 32, 0);
+		float drawX = Gdx.graphics.getWidth() / 4 + (x - level.width / 2f) * 32;
+		soil.setColor(1, 1, 1);
+		for (int i = 0; i < 3; i++) {
+			if (i == 2) {
+				soilTop.draw(batch, drawX, i * 32);
+			} else {
+				soil.draw(batch, drawX, i * 32);
+			}
+		}
 	}
 }

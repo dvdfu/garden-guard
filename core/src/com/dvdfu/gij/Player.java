@@ -2,6 +2,7 @@ package com.dvdfu.gij;
 
 import java.util.LinkedList;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.components.GamepadComponent;
 import com.dvdfu.gij.components.GamepadComponent.Button;
@@ -9,7 +10,7 @@ import com.dvdfu.gij.components.SpriteComponent;
 
 public class Player {
 	enum Actions {
-		MOVE_LEFT, MOVE_RIGHT, ATTACK_LEFT, ATTACK_RIGHT, FOCUS, GUARD, NULL
+		MOVE_LEFT, MOVE_RIGHT, AXE, WATER, SPROUT, NULL
 	}
 	boolean ready;
 	boolean doneMoves;
@@ -18,10 +19,9 @@ public class Player {
 	Level level;
 	SpriteComponent sprite;
 	SpriteComponent iconUnknown;
-	SpriteComponent iconMove;
-	SpriteComponent iconGuard;
-	SpriteComponent iconFocus;
-	SpriteComponent iconAttack;
+	SpriteComponent iconMoveLeft;
+	SpriteComponent iconMoveRight;
+	SpriteComponent iconSprout;
 	int xCell;
 	float x;
 	int timer;
@@ -39,14 +39,14 @@ public class Player {
 	
 	public Player(Level level) {
 		this.level = level;
-		sprite = new SpriteComponent(Consts.atlas.findRegion("player"));
+		sprite = new SpriteComponent(Consts.atlas.findRegion("test"));
 		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
-		iconMove = new SpriteComponent(Consts.atlas.findRegion("icon_move"));
-		iconGuard = new SpriteComponent(Consts.atlas.findRegion("icon_guard"));
-		iconFocus = new SpriteComponent(Consts.atlas.findRegion("icon_focus"));
-		iconAttack = new SpriteComponent(Consts.atlas.findRegion("icon_attack"));
+		iconMoveLeft = new SpriteComponent(Consts.atlas.findRegion("icon_move_left"));
+		iconMoveRight = new SpriteComponent(Consts.atlas.findRegion("icon_move_right"));
+		iconSprout = new SpriteComponent(Consts.atlas.findRegion("icon_sprout"));
 		moveQueue = new LinkedList<Actions>();
 		t = new Text();
+		t.font = Consts.SmallFont;
 		t.centered = true;
 		keyRight = GamepadComponent.Button.RIGHT;
 		keyLeft = GamepadComponent.Button.LEFT;
@@ -61,7 +61,7 @@ public class Player {
 	public void update() {
 		System.out.println(moveQueue);
 		t.text = "P" + player + " Ready!";
-		if (level.movePhase) {
+		if (level.state == Level.State.QUEUING) {
 			handleInput();
 		}
 	}
@@ -77,17 +77,14 @@ public class Player {
 		}
 		if (level.gp.keyDown(player - 1, keyAttack)) {
 			if (level.gp.keyPressed(player - 1, keyRight)) {
-				addMove(Actions.ATTACK_RIGHT);
+				addMove(Actions.WATER);
 			}
 			if (level.gp.keyPressed(player - 1, keyLeft)) {
-				addMove(Actions.ATTACK_LEFT);
+				addMove(Actions.AXE);
 			}
 		}
-		if (level.gp.keyPressed(player - 1, keyGuard)) {
-			addMove(Actions.GUARD);
-		}
 		if (level.gp.keyPressed(player - 1, keyFocus)) {
-			addMove(Actions.FOCUS);
+			addMove(Actions.SPROUT);
 		}
 		if (level.gp.keyPressed(player - 1, keyUndo)) {
 			removeMove();
@@ -119,13 +116,11 @@ public class Player {
 	
 	public void perform(Actions action) {
 		switch (action) {
-		case ATTACK_LEFT:
+		case AXE:
 			break;
-		case ATTACK_RIGHT:
+		case WATER:
 			break;
-		case FOCUS:
-			break;
-		case GUARD:
+		case SPROUT:
 			break;
 		case MOVE_LEFT:
 			break;
@@ -137,33 +132,34 @@ public class Player {
 	}
 	
 	public void draw(SpriteBatch batch) {
+		float drawX = Gdx.graphics.getWidth() / 4 + (x - level.width / 2f) * 32;
+		
 		int xOffset = player == 1? 0: 200;
-		sprite.draw(batch, x, 16);
+		sprite.draw(batch, drawX, 160);
+		
 		for (int i = 0; i < moveQueue.size(); i++) {
 			SpriteComponent icon = iconUnknown;
 			switch (moveQueue.get(i)) {
-			case ATTACK_LEFT:
-			case ATTACK_RIGHT:
-				icon = iconAttack;
+			case AXE:
+			case WATER:
 				break;
-			case FOCUS:
-				icon = iconFocus;
-				break;
-			case GUARD:
-				icon = iconGuard;
+			case SPROUT:
+				icon = iconSprout;
 				break;
 			case MOVE_LEFT:
+				icon = iconMoveLeft;
+				break;
 			case MOVE_RIGHT:
-				icon = iconMove;
+				icon = iconMoveRight;
 				break;
 			default:
 				break;
 			}
-			icon.draw(batch, xOffset, 160 - i * 16);
+			icon.draw(batch, xOffset, 300 - i * 26);
 		}
 		
 		if (ready) {
-			t.draw(batch, xOffset, 0);
+			t.draw(batch, xOffset, 160);
 		}
 	}
 }

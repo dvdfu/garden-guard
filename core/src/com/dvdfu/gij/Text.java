@@ -18,7 +18,7 @@ public class Text {
 
 	public Text(String text) {
 		this.text = text;
-		font = Consts.Test;
+		font = Consts.BigFont;
 		color = new Color(1, 1, 1, 1);
 		font.setColor(color);
 		bordered = true;
@@ -33,23 +33,21 @@ public class Text {
 	}
 
 	public void draw(Batch batch) {
-		if (centered) {
-			draw(batch, x - getWidth() / 2, y + getHeight() / 2);
-		} else {
-			draw(batch, x, y);
-		}
+		draw(batch, x, y);
 	}
 
 	public void draw(Batch batch, float x, float y) {
+		float drawX = x - (centered? getWidth() / 2 : 0);
+		float drawY = y + (centered? getHeight() / 2 : 0);
 		if (bordered) {
 			font.setColor(0, 0, 0, 1);
 			for (int i = -1; i <= 1; i++) {
 				for (int j = -1; j <= 1; j++) {
-					font.draw(batch, text, x + i, y + j);
+					font.draw(batch, text, drawX + i, drawY + j);
 				}
 			}
 			font.setColor(color);
 		}
-		font.draw(batch, text, x, y);
+		font.draw(batch, text, drawX, drawY);
 	}
 }
