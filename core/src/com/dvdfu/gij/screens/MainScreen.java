@@ -12,7 +12,6 @@ public class MainScreen extends AbstractScreen {
 	SpriteBatch batch;
 	OrthographicCamera camera;
 	Level level;
-	
 
 	SpriteComponent soilOut;
 	SpriteComponent sky;

@@ -21,7 +21,7 @@ public class Player {
 	float x;
 	int player;
 	int fruit;
-	final int moveTime = 30;
+	final int moveTime = 20;
 	
 	SpriteComponent sprite;
 	SpriteComponent menuTray;
@@ -42,18 +42,25 @@ public class Player {
 	Button keyReady;
 	
 	Text t;
+	Text fruitsText;
 	
 	public Player(Level level, int player) {
 		this.level = level;
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
+		fruitsText = new Text();
+		fruitsText.font = Consts.SmallFont;
+		fruitsText.centered = true;
+		fruitsText.text = "0";
+		menuTray = new SpriteComponent(Consts.atlas.findRegion("test"));
+		menuTray.setSize(28, Consts.height);
 		if (player == 1) {
 			sprite.setColor(0.5f, 1, 0.7f);
+			fruitsText.color.set(0.5f, 1, 0.7f, 1);
 		} else {
 			sprite.setColor(1, 0.7f, 0.5f);
+			fruitsText.color.set(1, 0.7f, 0.5f, 1);
 		}
-		menuTray = new SpriteComponent(Consts.atlas.findRegion("test"));
-		menuTray.setSize(28, 200);
 		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
 		iconMoveLeft = new SpriteComponent(Consts.atlas.findRegion("icon_move_left"));
 		iconMoveRight = new SpriteComponent(Consts.atlas.findRegion("icon_move_right"));
@@ -140,13 +147,12 @@ public class Player {
 	}
 	
 	public boolean doneMoves() {
-		return actionQueue.size() == level.turn + 2;
+		return actionQueue.size() == level.movesThisTurn();
 	}
 	
 	public void startAction(Actions action) {
 		ready = false;
 		actionCurrent = action;
-		Cell cell = level.cells[xCell];
 		switch (action) {
 		case AXE:
 			timer = moveTime;
@@ -155,7 +161,6 @@ public class Player {
 			timer = moveTime;
 			break;
 		case SPROUT:
-			cell.setState(this, Cell.State.SPROUT);
 			timer = moveTime;
 			break;
 		case MOVE_LEFT:
@@ -204,6 +209,7 @@ public class Player {
 			break;
 		case SPROUT:
 			if (timer == 0) {
+				cell.setState(this, Cell.State.SPROUT);
 				level.switchPlayer();
 				ready = true;
 			} else {
@@ -240,26 +246,28 @@ public class Player {
 	}
 	
 	public void draw(SpriteBatch batch) {
-		int xOffset = player == 1? 100: Consts.width - 100;
+		int xOffset = player == 1? 160: Consts.width - 160;
 		if (player == 1 && xCell == level.p2.xCell) {
 			sprite.draw(batch, x, 192 + 16);
+			fruitsText.draw(batch, x + 16, 192 + 16 + 36);
 		} else {
 			sprite.draw(batch, x, 192);
+			fruitsText.draw(batch, x + 16, 192 + 36);
 		}
 		
-		int yOffset = (level.turn + 2) * 26 + 2 ;
+		int yOffset = (level.movesThisTurn()) * 26 + 2 ;
 		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - yOffset);
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
 			t.draw(batch, xOffset, Consts.height - yOffset - 16);
 		}
 		
-		for (int i = 2; i < level.turn + 2; i++) {
+		for (int i = 2; i < level.movesThisTurn(); i++) {
 			iconSelected.draw(batch, xOffset - iconSelected.getWidth() / 2, Consts.height - 2 - iconSelected.getHeight() - i * 26);
 		}
 		
 		for (int i = 0; i < actionQueue.size(); i++) {
 			SpriteComponent icon = iconUnknown;
-			if (level.state == Level.State.PERFORMING || i < 2) {
+			if ((level.state != Level.State.QUEUING && level.state != Level.State.GARDEN_TEXT) || i < 2) {
 				switch (actionQueue.get(i)) {
 				case AXE:
 					icon = iconAxe;

@@ -15,6 +15,7 @@ public class Level {
 	int stateTimer;
 	final int width = 10;
 	int turn;
+	int turnMove;
 	Player p1;
 	Player p2;
 	Player pT;
@@ -41,10 +42,8 @@ public class Level {
 		for (int i = 0; i < width; i++) {
 			cells[i] = new Cell(this, i);
 		}
-		turn = 1;
 		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
-		
 		water = new Array<Water>();
 		waterPool = new Pool<Water>() {
 			protected Water newObject() {
@@ -55,6 +54,7 @@ public class Level {
 	}
 	
 	public void switchState(State state) {
+		this.state = state;
 		switch (state) {
 		case COUNTING:
 			boolean fruit = false;
@@ -70,6 +70,8 @@ public class Level {
 					}
 				}
 			}
+			p1.fruitsText.text = "" + p1.fruit;
+			p2.fruitsText.text = "" + p2.fruit;
 			if (fruit) {
 				stateTimer = 120;
 			} else {
@@ -86,10 +88,12 @@ public class Level {
 			break;
 		case PERFORMING:
 			stateTimer = 0;
+			turnMove = 0;
 			break;
 		case QUEUING:
 			break;
 		case ROUND_TEXT:
+			turn++;
 			p1.newRound();
 			p2.newRound();
 			stateTimer = 60;
@@ -100,7 +104,6 @@ public class Level {
 		default:
 			break;
 		}
-		this.state = state;
 	}
 	
 	public void handleState() {
@@ -115,17 +118,17 @@ public class Level {
 			handleTimer();
 			break;
 		case PERFORMING:
-			if (pT.ready) {
-				if (pT.actionQueue.isEmpty()) {
-					switchPlayer();
-				} else {
-					perform(pT, pT.actionQueue.removeFirst());
-				}
-			}
-			if (p1.actionQueue.isEmpty() && p2.actionQueue.isEmpty() && p1.ready && p2.ready) {
-				turn++;
+			if (turnMove >= movesThisTurn() * 2 && p1.ready && p2.ready) {
 				switchState(State.COUNTING);
 				return;
+			}
+			if (pT.ready) {
+				if (turnMove / 2 > pT.actionQueue.size()) {
+					switchPlayer();
+				} else {
+					perform(pT, pT.actionQueue.get(turnMove / 2));
+					turnMove++;
+				}
 			}
 			break;
 		case QUEUING:
@@ -257,5 +260,9 @@ public class Level {
 		}
 		p1.draw(batch);
 		p2.draw(batch);
+	}
+	
+	public int movesThisTurn() {
+		return turn + 2;
 	}
 }
