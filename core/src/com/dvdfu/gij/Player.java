@@ -36,7 +36,7 @@ public class Player {
 		sprite = new SpriteComponent(Consts.atlas.findRegion("player"));
 		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
 		moveQueue = new LinkedList<Actions>();
-		t = new Text("P1 Ready!");
+		t = new Text();
 		t.centered = true;
 		keyRight = GamepadComponent.Button.RIGHT;
 		keyLeft = GamepadComponent.Button.LEFT;
@@ -49,6 +49,8 @@ public class Player {
 	}
 	
 	public void update() {
+		System.out.println(moveQueue);
+		t.text = "P" + player + " Ready!";
 		if (level.movePhase) {
 			handleInput();
 		}

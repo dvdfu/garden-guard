@@ -23,7 +23,7 @@ public class GamepadComponent implements ControllerListener{
 	}
 	
 	public enum Button {
-		RIGHT, LEFT, UP, DOWN, L, R, TRI, SQU, CIR, CRO
+		RIGHT, LEFT, L, R, TRI, SQU, CIR, CRO
 	}
 
 	public GamepadComponent() {
@@ -89,32 +89,14 @@ public class GamepadComponent implements ControllerListener{
 		return false;
 	}
 
-	public boolean axisMoved(Controller controller, int axisCode, float value) {
+	public boolean povMoved(Controller controller, int povCode, PovDirection value) {
 		Device d = map.get(controller);
-		switch (axisCode) {
-			case 6:
-			if (value > 0.5f) {
-				d.keys[Button.RIGHT.ordinal()] = true;
-			} else if (value < -0.5f) {
-				d.keys[Button.LEFT.ordinal()] = true;
-			} else {
-				d.keys[Button.RIGHT.ordinal()] = false;
-				d.keys[Button.LEFT.ordinal()] = false;
-			} break;
-			case 7:
-			if (value > 0.5f) {
-				d.keys[Button.DOWN.ordinal()] = true;
-			} else if (value < -0.5f) {
-				d.keys[Button.UP.ordinal()] = true;
-			} else {
-				d.keys[Button.DOWN.ordinal()] = false;
-				d.keys[Button.UP.ordinal()] = false;
-			} break;
-		}
+		d.keys[Button.RIGHT.ordinal()] = value == PovDirection.east;
+		d.keys[Button.LEFT.ordinal()] = value == PovDirection.west;
 		return false;
 	}
 
-	public boolean povMoved(Controller controller, int povCode, PovDirection value) { return false; }
+	public boolean axisMoved(Controller controller, int axisCode, float value) { return false; }
 	public boolean xSliderMoved(Controller controller, int sliderCode, boolean value) { return false; }
 	public boolean ySliderMoved(Controller controller, int sliderCode, boolean value) { return false; }
 	public boolean accelerometerMoved(Controller controller, int accelerometerCode, Vector3 value) { return false; }
