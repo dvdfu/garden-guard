@@ -79,7 +79,6 @@ public class Level {
 					switchPlayer();
 				} else {
 					perform(pT, pT.actionQueue.removeFirst());
-					System.out.println("p " + stateTimer);
 				}
 			}
 			if (p1.actionQueue.isEmpty() && p2.actionQueue.isEmpty() && p1.ready && p2.ready) {
@@ -141,6 +140,7 @@ public class Level {
 	public void perform(Player player, Player.Actions action) {
 		switch (action) {
 		case AXE:
+			player.startAction(action);
 			break;
 		case MOVE_LEFT:
 			if (player.xCell > 0) {
@@ -157,10 +157,13 @@ public class Level {
 			}
 			break;
 		case NULL:
+			player.startAction(action);
 			break;
 		case SPROUT:
+			player.startAction(action);
 			break;
 		case WATER:
+			player.startAction(action);
 			break;
 		default:
 			break;

@@ -1,6 +1,6 @@
 
 images.png
-size: 256,64
+size: 256,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
@@ -20,92 +20,113 @@ icon_axe
   index: -1
 icon_move_left
   rotate: false
-  xy: 206, 36
+  xy: 28, 2
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_move_right
   rotate: false
-  xy: 28, 2
+  xy: 54, 2
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_selected
   rotate: false
-  xy: 54, 2
+  xy: 80, 2
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_sprout
   rotate: false
-  xy: 80, 2
+  xy: 102, 68
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_unknown
   rotate: false
-  xy: 106, 2
+  xy: 128, 68
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_water
   rotate: false
-  xy: 132, 2
+  xy: 154, 68
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 player
   rotate: false
-  xy: 232, 44
+  xy: 238, 110
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 sky
   rotate: false
-  xy: 36, 28
+  xy: 102, 94
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil
   rotate: false
-  xy: 70, 28
+  xy: 36, 28
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_out
   rotate: false
-  xy: 104, 28
+  xy: 70, 28
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_top
   rotate: false
-  xy: 138, 28
+  xy: 136, 94
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 sprout
   rotate: false
-  xy: 172, 28
+  xy: 170, 94
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+sprout_red
+  rotate: false
+  xy: 204, 94
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 test
   rotate: false
-  xy: 158, 10
+  xy: 238, 92
   size: 16, 16
   orig: 16, 16
+  offset: 0, 0
+  index: -1
+tree
+  rotate: false
+  xy: 2, 62
+  size: 48, 64
+  orig: 48, 64
+  offset: 0, 0
+  index: -1
+tree_red
+  rotate: false
+  xy: 52, 62
+  size: 48, 64
+  orig: 48, 64
   offset: 0, 0
   index: -1

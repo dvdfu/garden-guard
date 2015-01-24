@@ -48,9 +48,9 @@ public class Player {
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
 		if (player == 1) {
-			sprite.setColor(1, 0.8f, 0.7f);
+			sprite.setColor(0.7f, 1, 0.8f);
 		} else {
-			sprite.setColor(0.7f, 0.8f, 1);
+			sprite.setColor(1, 0.8f, 0.7f);
 		}
 		menuTray = new SpriteComponent(Consts.atlas.findRegion("test"));
 		menuTray.setSize(28, 200);
@@ -73,7 +73,7 @@ public class Player {
 		keyUndo = GamepadComponent.Button.L;
 		keyReady = GamepadComponent.Button.R;
 		actionCurrent = Actions.NULL;
-		xCell = player == 1 ? 0 : 6;
+		xCell = player == 1 ? 1 : level.width - 2;
 		x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 	}
 	
@@ -151,12 +151,14 @@ public class Player {
 			ready = true;
 			break;
 		case WATER:
-			level.switchPlayer();
-			ready = true;
+			if (level.cells[xCell].state == Cell.State.SPROUT) {
+				level.cells[xCell].setState(this, Cell.State.TREE);
+			}
+			timer = moveTime;
 			break;
 		case SPROUT:
-			level.switchPlayer();
-			ready = true;
+			level.cells[xCell].setState(this, Cell.State.SPROUT);
+			timer = moveTime;
 			break;
 		case MOVE_LEFT:
 			timer = moveTime;
@@ -178,8 +180,20 @@ public class Player {
 		case AXE:
 			break;
 		case WATER:
+			if (timer == 0) {
+				level.switchPlayer();
+				ready = true;
+			} else {
+				timer--;
+			}
 			break;
 		case SPROUT:
+			if (timer == 0) {
+				level.switchPlayer();
+				ready = true;
+			} else {
+				timer--;
+			}
 			break;
 		case MOVE_LEFT:
 			if (timer == 0) {
@@ -212,9 +226,14 @@ public class Player {
 	
 	public void draw(SpriteBatch batch) {
 		int xOffset = player == 1? 100: Consts.width - 100;
-		sprite.draw(batch, x, 160);
+		if (player == 1 && xCell == level.p2.xCell) {
+			sprite.draw(batch, x, 160 + 16);
+		} else {
+			sprite.draw(batch, x, 160);
+		}
 		
-		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - 200);
+		int yOffset = (level.turn + 2) * 26 + 2 ;
+		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - yOffset);
 		
 		for (int i = 0; i < actionQueue.size(); i++) {
 			SpriteComponent icon = iconUnknown;
@@ -238,9 +257,6 @@ public class Player {
 				break;
 			}
 			icon.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight() - i * 26);
-//			if (level) {
-//				iconSelected.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight());
-//			}
 		}
 		
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {

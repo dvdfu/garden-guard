@@ -16,6 +16,7 @@ public class Cell {
 	SpriteComponent soil;
 	SpriteComponent soilTop;
 	SpriteComponent sprout;
+	SpriteComponent tree;
 	
 	public Cell(Level level, int x) {
 		this.level = level;
@@ -23,6 +24,8 @@ public class Cell {
 		soil = new SpriteComponent(Consts.atlas.findRegion("soil"));
 		soilTop = new SpriteComponent(Consts.atlas.findRegion("soil_top"));
 		sprout = new SpriteComponent(Consts.atlas.findRegion("sprout"));
+		tree = new SpriteComponent(Consts.atlas.findRegion("tree"));
+		tree.setOrigin(8, 0);
 		state = State.EMPTY;
 	}
 	
@@ -43,6 +46,7 @@ public class Cell {
 			sprout.draw(batch, drawX, 96);
 			break;
 		case TREE:
+			tree.drawOrigin(batch, drawX, 96);
 			break;
 		default:
 			break;
@@ -56,8 +60,18 @@ public class Cell {
 		case EMPTY:
 			break;
 		case SPROUT:
+			if (owner.equals(level.p1)) {
+				sprout.setImage(Consts.atlas.findRegion("sprout"));
+			} else {
+				sprout.setImage(Consts.atlas.findRegion("sprout_red"));
+			}
 			break;
 		case TREE:
+			if (owner.equals(level.p1)) {
+				tree.setImage(Consts.atlas.findRegion("tree"));
+			} else {
+				tree.setImage(Consts.atlas.findRegion("tree_red"));
+			}
 			break;
 		default:
 			break;
