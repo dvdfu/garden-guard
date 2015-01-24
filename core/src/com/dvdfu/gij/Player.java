@@ -2,9 +2,9 @@ package com.dvdfu.gij;
 
 import java.util.LinkedList;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.dvdfu.gij.components.GamepadComponent;
+import com.dvdfu.gij.components.GamepadComponent.Button;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Player {
@@ -16,37 +16,36 @@ public class Player {
 	LinkedList<Actions> moveQueue;
 	Level level;
 	SpriteComponent sprite;
+	SpriteComponent iconUnknown;
 	int xCell;
 	int timer;
+	int player;
 	
-	int RIGHT;
-	int LEFT;
-	int MOVE;
-	int ATTACK;
-	int GUARD;
-	int FOCUS;
-	int REMOVE;
-	int READY;
+	Button keyRight;
+	Button keyLeft;
+	Button keyMove;
+	Button keyAttack;
+	Button keyGuard;
+	Button keyFocus;
+	Button keyUndo;
+	Button keyReady;
+	Text t;
 	
 	public Player(Level level) {
 		this.level = level;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("player"));
+		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
 		moveQueue = new LinkedList<Actions>();
-	}
-	
-	public void setPlayer(int player) {
-		if (player == 1) {
-			RIGHT = Input.Keys.RIGHT;
-			LEFT = Input.Keys.LEFT;
-			MOVE = Input.Keys.M;
-			ATTACK = Input.Keys.A;
-			GUARD = Input.Keys.G;
-			FOCUS = Input.Keys.F;
-			REMOVE = Input.Keys.BACKSPACE;
-			READY = Input.Keys.ENTER;
-		} else {
-			
-		}
+		t = new Text("P1 Ready!");
+		t.centered = true;
+		keyRight = GamepadComponent.Button.RIGHT;
+		keyLeft = GamepadComponent.Button.LEFT;
+		keyMove = GamepadComponent.Button.CIR;
+		keyAttack = GamepadComponent.Button.CRO;
+		keyGuard = GamepadComponent.Button.SQU;
+		keyFocus = GamepadComponent.Button.TRI;
+		keyUndo = GamepadComponent.Button.L;
+		keyReady = GamepadComponent.Button.R;
 	}
 	
 	public void update() {
@@ -56,36 +55,34 @@ public class Player {
 	}
 	
 	public void handleInput() {
-		if (Gdx.input.isKeyPressed(Input.Keys.M)) {
-			if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+		if (level.gp.keyDown(player - 1, keyMove)) {
+			if (level.gp.keyPressed(player - 1, keyRight)) {
 				addMove(Actions.MOVE_RIGHT);
 			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+			if (level.gp.keyPressed(player - 1, keyLeft)) {
 				addMove(Actions.MOVE_LEFT);
 			}
 		}
-		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-			if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+		if (level.gp.keyDown(player - 1, keyAttack)) {
+			if (level.gp.keyPressed(player - 1, keyRight)) {
 				addMove(Actions.ATTACK_RIGHT);
 			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
+			if (level.gp.keyPressed(player - 1, keyLeft)) {
 				addMove(Actions.ATTACK_LEFT);
 			}
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
+		if (level.gp.keyPressed(player - 1, keyGuard)) {
 			addMove(Actions.GUARD);
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
+		if (level.gp.keyPressed(player - 1, keyFocus)) {
 			addMove(Actions.FOCUS);
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
+		if (level.gp.keyPressed(player - 1, keyUndo)) {
 			removeMove();
 		}
-		if (doneMoves && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+		if (doneMoves && level.gp.keyPressed(player - 1, keyReady)) {
 			ready = true;
 		}
-		System.out.println("-------------");
-		System.out.println(moveQueue);
 	}
 	
 	public void newRound() {
@@ -109,7 +106,14 @@ public class Player {
 	}
 	
 	public void draw(SpriteBatch batch) {
+		int xOffset = player == 1? 0: 200;
 		sprite.draw(batch, xCell * 32, 16);
+		for (int i = 0; i < moveQueue.size(); i++) {
+			iconUnknown.draw(batch, xOffset, 160 - i * 16);
+		}
 		
+		if (ready) {
+			t.draw(batch, xOffset, 0);
+		}
 	}
 }
