@@ -31,6 +31,8 @@ public class Level {
 	Pool<Leaf> leafPool;
 	Array<Wood> wood;
 	Pool<Wood> woodPool;
+	Array<Star> stars;
+	Pool<Star> starPool;
 	
 	SpriteComponent buttonTri;
 	SpriteComponent buttonCir;
@@ -38,6 +40,8 @@ public class Level {
 	SpriteComponent buttonDPad;
 	SpriteComponent buttonL;
 	SpriteComponent buttonR;
+	
+	boolean celebration;
 
 	public Level() {
 		p1 = new Player(this, 1);
@@ -76,6 +80,12 @@ public class Level {
 		woodPool = new Pool<Wood>() {
 			protected Wood newObject() {
 				return new Wood();
+			}
+		};
+		stars = new Array<Star>();
+		starPool = new Pool<Star>() {
+			protected Star newObject() {
+				return new Star();
 			}
 		};
 		
@@ -137,10 +147,12 @@ public class Level {
 			int diff = p1.fruit - p2.fruit;
 			if (diff > 0) {
 				screenLabel.text = "PLAYER 1 WINS!";
+				celebration = true;
 			} else if (diff == 0) {
 				screenLabel.text = "DRAW GAME!";
 			} else {
 				screenLabel.text = "PLAYER 2 WINS!";
+				celebration = true;
 			}
 			break;
 		default:
@@ -165,7 +177,7 @@ public class Level {
 				if (turnMove / 2 > pT.actionQueue.size()) {
 					switchPlayer();
 				} else {
-					perform(pT, pT.actionQueue.get(turnMove / 2));
+					pT.startAction(pT.actionQueue.get(turnMove / 2));
 					turnMove++;
 				}
 			}
@@ -219,6 +231,12 @@ public class Level {
 
 	public void update() {
 		handleState();
+		if (celebration) {
+			Star s = starPool.obtain();
+			s.x = Consts.width / 2;
+			s.y = Consts.height / 2 + 128;
+			stars.add(s);
+		}
 		for (int i = 0; i < water.size; i++) {
 			water.get(i).update();
 			if (water.get(i).dead) {
@@ -243,42 +261,17 @@ public class Level {
 				i--;
 			}
 		}
+		for (int i = 0; i < stars.size; i++) {
+			stars.get(i).update();
+			if (stars.get(i).dead) {
+				starPool.free(stars.get(i));
+				stars.removeIndex(i);
+				i--;
+			}
+		}
 		p1.update();
 		p2.update();
 		gp.update();
-	}
-	
-	public void perform(Player player, Player.Actions action) {
-		switch (action) {
-		case AXE:
-			player.startAction(action);
-			break;
-		case MOVE_LEFT:
-			if (player.xCell > 0) {
-				player.startAction(action);
-			} else {
-				stateTimer++;
-			}
-			break;
-		case MOVE_RIGHT:
-			if (player.xCell < width - 1) {
-				player.startAction(action);
-			} else {
-				stateTimer++;
-			}
-			break;
-		case NULL:
-			player.startAction(action);
-			break;
-		case SPROUT:
-			player.startAction(action);
-			break;
-		case WATER:
-			player.startAction(action);
-			break;
-		default:
-			break;
-		}
 	}
 	
 	public void switchPlayer() {
@@ -300,6 +293,9 @@ public class Level {
 			w.draw(batch);
 		}
 		for (Water w : water) {
+			w.draw(batch);
+		}
+		for (Star w : stars) {
 			w.draw(batch);
 		}
 		p1.draw(batch);
@@ -334,22 +330,36 @@ public class Level {
 		if (state == State.GARDEN_TEXT ||
 				state == State.ROUND_TEXT ||
 				state == State.VICTORY_TEXT) {
-				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
+			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
+		}
+		if (state == State.PERFORMING) {
+			if (pT.equals(p1)) {
+				screenLabel.color.set(0.5f, 1, 0.7f, 1);
+			} else {
+				screenLabel.color.set(1, 0.7f, 0.5f, 1);
 			}
-			if (state == State.COUNTING) {
-				for (int i = 0; i < width; i++) {
-					Cell c = cells[i];
-					if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
-						if (c.owner.equals(p1)) {
-							incLabel.color.set(0.5f, 1, 0.7f, 1);
-						} else {
-							incLabel.color.set(1, 0.7f, 0.5f, 1);
-						}
-						incLabel.text = "+" + c.getValue();
-						incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
+			screenLabel.text = "P" + pT.player + " used " + pT.actionCurrent.toString();
+			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
+			screenLabel.color.set(1, 1, 1, 1);
+			if (pT.useless) {
+				screenLabel.text = "(it was useless)";
+				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 112);
+			}
+		}
+		if (state == State.COUNTING) {
+			for (int i = 0; i < width; i++) {
+				Cell c = cells[i];
+				if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
+					if (c.owner.equals(p1)) {
+						incLabel.color.set(0.5f, 1, 0.7f, 1);
+					} else {
+						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
+					incLabel.text = "+" + c.getValue();
+					incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
 				}
 			}
+		}
 	}
 	
 	public int movesThisTurn() {

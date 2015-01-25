@@ -23,6 +23,7 @@ public class Player {
 	int fruit;
 	final int moveTime = 20;
 	float cursorTime;
+	boolean useless;
 	
 	SpriteComponent sprite;
 	SpriteComponent iconUnknown;
@@ -161,29 +162,58 @@ public class Player {
 		Cell cell = level.cells[xCell];
 		switch (action) {
 		case AXE:
+			useless = true;
+			if (cell.state == Cell.State.TREE || cell.state == Cell.State.TRUNK) {
+				if (cell.owner.xCell != cell.x || cell.owner.equals(this)) {
+					useless = false;
+					int i = cell.x - 1;
+					while (i >= 0 && level.cells[i].state == cell.state) {
+						level.cells[i].slash();
+						i--;
+					}
+					i = cell.x + 1;
+					while (i < level.width && level.cells[i].state == cell.state) {
+						level.cells[i].slash();
+						i++;
+					}
+				}
+			}
 			cell.slash();
-			int i = cell.x - 1;
-			while (i >= 0 && level.cells[i].state == Cell.State.TREE) {
-				level.cells[i].slash();
-				i--;
-			}
-			i = cell.x + 1;
-			while (i < level.width && level.cells[i].state == Cell.State.TREE) {
-				level.cells[i].slash();
-				i++;
-			}
 			timer = moveTime;
 			break;
 		case WATER:
+			useless = true;
+			if (cell.state == Cell.State.SPROUT) {
+				useless = false;
+			}
+			Cell oCell;
+			if (cell.x > 0) {
+				oCell = level.cells[cell.x - 1];
+				if (oCell.state == Cell.State.SPROUT) {
+					useless = false;
+				}
+			}
+			if (cell.x < level.width - 1) {
+				oCell = level.cells[cell.x + 1];
+				if (oCell.state == Cell.State.SPROUT) {
+					useless = false;
+				}
+			}
 			timer = moveTime * 2;
 			break;
 		case SPROUT:
+			useless = true;
+			if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
+				useless = false;
+			}
 			timer = moveTime;
 			break;
 		case MOVE_LEFT:
+			useless = xCell <= 0;
 			timer = moveTime;
 			break;
 		case MOVE_RIGHT:
+			useless = xCell > level.width - 2;
 			timer = moveTime;
 			break;
 		case NULL:
@@ -266,24 +296,32 @@ public class Player {
 			if (timer == 0) {
 				level.switchPlayer();
 				ready = true;
-				xCell--;
-				x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
+				if (!useless) {
+					xCell--;
+					x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
+				}
 			} else {
 				timer--;
-				float tx = MathUtils.lerp(xCell, xCell - 1, 1f * (moveTime - timer) / moveTime);
-				x = Consts.width / 2 + (tx - level.width / 2f) * 32;
+				if (!useless) {
+					float tx = MathUtils.lerp(xCell, xCell - 1, 1f * (moveTime - timer) / moveTime);
+					x = Consts.width / 2 + (tx - level.width / 2f) * 32;
+				}
 			}
 			break;
 		case MOVE_RIGHT:
 			if (timer == 0) {
 				level.switchPlayer();
 				ready = true;
-				xCell++;
-				x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
+				if (!useless) {
+					xCell++;
+					x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
+				}
 			} else {
 				timer--;
-				float tx = MathUtils.lerp(xCell, xCell + 1, 1f * (moveTime - timer) / moveTime);
-				x = Consts.width / 2 + (tx - level.width / 2f) * 32;
+				if (!useless) {
+					float tx = MathUtils.lerp(xCell, xCell + 1, 1f * (moveTime - timer) / moveTime);
+					x = Consts.width / 2 + (tx - level.width / 2f) * 32;
+				}
 			}
 			break;
 		default:
@@ -333,6 +371,7 @@ public class Player {
 					break;
 				}
 			}
+			
 			icon.draw(batch, xOffset - icon.getWidth() / 2, yOffset - icon.getHeight() - i * 26);
 		}
 	}
