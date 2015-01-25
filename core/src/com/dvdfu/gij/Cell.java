@@ -82,11 +82,13 @@ public class Cell {
 				if (state == State.TREE) setState(this.owner, State.TRUNK);
 				else if (state == State.TRUNK) setState(this.owner, State.EMPTY);
 				Consts.chop.play();
-				for (int i = 0; i < 20; i++) {
-					Wood l = level.woodPool.obtain();
-					l.x = drawX + 16;
-					l.y = 96;
-					level.wood.add(l);
+				if (state == State.TREE || state == State.TRUNK) {
+					for (int i = 0; i < 20; i++) {
+						Wood l = level.woodPool.obtain();
+						l.x = drawX + 16;
+						l.y = 96;
+						level.wood.add(l);
+					}
 				}
 			}
 		}

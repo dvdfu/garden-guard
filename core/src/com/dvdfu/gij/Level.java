@@ -13,7 +13,7 @@ public class Level {
 	public State state;
 	int stateTimer;
 	final int width = 9;
-	int turnWin = 8;
+	int turnWin = 6;
 	int turn;
 	int turnMove;
 	public Player p1;

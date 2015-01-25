@@ -21,7 +21,7 @@ public class Player {
 	public float x;
 	int player;
 	int fruit;
-	final int moveTime = 60;
+	final int moveTime = 40;
 	float cursorTime;
 	boolean useless;
 	
@@ -166,7 +166,22 @@ public class Player {
 		switch (action) {
 		case AXE:
 			useless = true;
-			if (cell.state == Cell.State.TREE || cell.state == Cell.State.TRUNK) {
+			if (cell.state == Cell.State.TREE) {
+				if (cell.owner.xCell != cell.x || cell.owner.equals(this)) {
+					useless = false;
+					int i = cell.x - 1;
+					while (i >= 0 && level.cells[i].state == cell.state && level.cells[i].owner == cell.owner) {
+						level.cells[i].slash();
+						i--;
+					}
+					i = cell.x + 1;
+					while (i < level.width && level.cells[i].state == cell.state && level.cells[i].owner == cell.owner) {
+						level.cells[i].slash();
+						i++;
+					}
+				}
+			}
+			if (cell.state == Cell.State.TRUNK) {
 				if (cell.owner.xCell != cell.x || cell.owner.equals(this)) {
 					useless = false;
 					int i = cell.x - 1;
@@ -237,7 +252,7 @@ public class Player {
 				level.switchPlayer();
 				ready = true;
 			} else {
-				if (timer == 30) {
+				if (timer == moveTime / 2) {
 					if (!useless) {
 						Consts.tree.play();
 					}
@@ -258,8 +273,9 @@ public class Player {
 						}
 					}
 				}
-				if (timer % 10 == 0) {
-					Consts.water.play();
+				if (timer % 5 == 0) {
+					long id = Consts.water.play();
+					Consts.water.setPitch(id, MathUtils.lerp(0.5f, 1f, 1f * timer / moveTime));
 				}
 				timer--;
 				for (int i = 0; i < 2; i++) {
