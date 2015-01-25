@@ -8,17 +8,17 @@ import com.dvdfu.gij.components.GamepadComponent;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Level {
-	enum State {
+	public enum State {
 		ROUND_TEXT, GET_READY_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING, COUNTING
 	}
-	State state;
+	public State state;
 	int stateTimer;
 	final int width = 10;
 	int turn;
 	int turnMove;
-	Player p1;
-	Player p2;
-	Player pT;
+	public Player p1;
+	public Player p2;
+	public Player pT;
 	Cell[] cells;
 	GamepadComponent gp;
 	Text screenLabel;
@@ -27,6 +27,9 @@ public class Level {
 	
 	Array<Water> water;
 	Pool<Water> waterPool;
+	
+	Array<Leaf> leaves;
+	Pool<Leaf> leafPool;
 
 	public Level() {
 		p1 = new Player(this, 1);
@@ -48,6 +51,12 @@ public class Level {
 		waterPool = new Pool<Water>() {
 			protected Water newObject() {
 				return new Water();
+			}
+		};
+		leaves = new Array<Leaf>();
+		leafPool = new Pool<Leaf>() {
+			protected Leaf newObject() {
+				return new Leaf();
 			}
 		};
 		instr = new SpriteComponent(Consts.atlas.findRegion("instr"));
@@ -187,6 +196,14 @@ public class Level {
 				i--;
 			}
 		}
+		for (int i = 0; i < leaves.size; i++) {
+			leaves.get(i).update();
+			if (leaves.get(i).dead) {
+				leafPool.free(leaves.get(i));
+				leaves.removeIndex(i);
+				i--;
+			}
+		}
 		p1.update();
 		p2.update();
 		gp.update();
@@ -234,7 +251,9 @@ public class Level {
 	}
 
 	public void draw(SpriteBatch batch) {
-		if (state == State.GET_READY_TEXT || state == State.GARDEN_TEXT || state == State.ROUND_TEXT) {
+		if (state == State.GET_READY_TEXT || 
+			state == State.GARDEN_TEXT ||
+			state == State.ROUND_TEXT) {
 			screenLabel.draw(batch, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 4 + 80);
 		}
 		for (int i = 0; i < width; i++) {
@@ -248,7 +267,7 @@ public class Level {
 					} else {
 						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
-					incLabel.draw(batch, Consts.width / 2 + (i + 0.5f - width / 2) * 32, 176);
+					incLabel.draw(batch, Consts.width / 2 + (i + 0.5f - width / 2) * 32, 176 - stateTimer / 6);
 				}
 			}
 		}
@@ -257,6 +276,9 @@ public class Level {
 		}
 		for (Water w : water) {
 			w.draw(batch);
+		}
+		for (Leaf l : leaves) {
+			l.draw(batch);
 		}
 		p1.draw(batch);
 		p2.draw(batch);

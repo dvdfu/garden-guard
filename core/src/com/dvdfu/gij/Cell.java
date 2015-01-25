@@ -17,6 +17,8 @@ public class Cell {
 	SpriteComponent soilTop;
 	SpriteComponent sprout;
 	SpriteComponent tree;
+	SpriteComponent slash;
+	boolean drawSlash;
 	
 	public Cell(Level level, int x) {
 		this.level = level;
@@ -25,12 +27,14 @@ public class Cell {
 		soilTop = new SpriteComponent(Consts.atlas.findRegion("soil_top"));
 		sprout = new SpriteComponent(Consts.atlas.findRegion("sprout"));
 		tree = new SpriteComponent(Consts.atlas.findRegion("tree"));
+		slash = new SpriteComponent(Consts.atlas.findRegion("slash"), 48);
+		slash.setOrigin(8, 0);
+		slash.setFrameRate(1);
 		state = State.EMPTY;
 	}
 	
 	public void draw(SpriteBatch batch) {
 		float drawX = Gdx.graphics.getWidth() / 4 + (x - level.width / 2f) * 32;
-		soil.setColor(1, 1, 1);
 		for (int i = 0; i < 3; i++) {
 			if (i == 2) {
 				soilTop.draw(batch, drawX, i * 32);
@@ -50,6 +54,18 @@ public class Cell {
 		default:
 			break;
 		}
+		if (drawSlash) {
+			slash.update();
+			slash.drawOrigin(batch, drawX, 96);
+			if (slash.getFrame() == 7) {
+				drawSlash = false;
+			}
+		}
+	}
+	
+	public void slash() {
+		drawSlash = true;
+		slash.setFrame(0);
 	}
 	
 	public void setState(Player owner, Cell.State state) {

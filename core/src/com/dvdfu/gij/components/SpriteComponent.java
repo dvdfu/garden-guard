@@ -89,6 +89,10 @@ public class SpriteComponent {
 		count = 0;
 	}
 	
+	public int getFrame() {
+		return frame;
+	}
+	
 	public void setFrameRate(int frameRate) {
 		this.frameRate = frameRate;
 	}

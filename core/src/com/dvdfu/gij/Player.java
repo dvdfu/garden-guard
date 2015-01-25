@@ -18,10 +18,11 @@ public class Player {
 	Actions actionCurrent;
 	int timer;
 	int xCell;
-	float x;
+	public float x;
 	int player;
 	int fruit;
 	final int moveTime = 20;
+	float cursorTime;
 	
 	SpriteComponent sprite;
 	SpriteComponent menuTray;
@@ -85,6 +86,11 @@ public class Player {
 	}
 	
 	public void update() {
+		if (cursorTime > 1) {
+			cursorTime--;
+		} else {
+			cursorTime += 0.01f;
+		}
 		t.text = "P" + player + " Ready!";
 		switch (level.state) {
 		case GET_READY_TEXT:
@@ -153,12 +159,14 @@ public class Player {
 	public void startAction(Actions action) {
 		ready = false;
 		actionCurrent = action;
+		Cell cell = level.cells[xCell];
 		switch (action) {
 		case AXE:
+			cell.slash();
 			timer = moveTime;
 			break;
 		case WATER:
-			timer = moveTime;
+			timer = moveTime * 2;
 			break;
 		case SPROUT:
 			timer = moveTime;
@@ -198,18 +206,29 @@ public class Player {
 			break;
 		case AXE:
 			if (timer == 0) {
-				if (cell.state == Cell.State.TREE) {
+				if (cell.state == Cell.State.TREE || cell.state == Cell.State.SPROUT) {
 					cell.setState(this, Cell.State.EMPTY);
 				}
 				level.switchPlayer();
 				ready = true;
 			} else {
 				timer--;
+				if (cell.state == Cell.State.TREE) {
+					for (int i = 0; i < 2; i++) {
+						Leaf l = level.leafPool.obtain();
+						l.x = x + 16;
+						l.y = 128;
+						l.setPlayer(player);
+						level.leaves.add(l);
+					}
+				}
 			}
 			break;
 		case SPROUT:
 			if (timer == 0) {
-				cell.setState(this, Cell.State.SPROUT);
+				if (cell.state != Cell.State.TREE) {
+					cell.setState(this, Cell.State.SPROUT);
+				}
 				level.switchPlayer();
 				ready = true;
 			} else {
@@ -246,16 +265,13 @@ public class Player {
 	}
 	
 	public void draw(SpriteBatch batch) {
+		float yOffset = (player == 1 && xCell == level.p2.xCell)? 40 : 0;
+		fruitsText.draw(batch, x + 16, 192 + yOffset + 40);
+		yOffset += 4 * MathUtils.sin(cursorTime * MathUtils.PI2);
+		sprite.draw(batch, x, 192 + yOffset);
+
 		int xOffset = player == 1? 160: Consts.width - 160;
-		if (player == 1 && xCell == level.p2.xCell) {
-			sprite.draw(batch, x, 192 + 16);
-			fruitsText.draw(batch, x + 16, 192 + 16 + 36);
-		} else {
-			sprite.draw(batch, x, 192);
-			fruitsText.draw(batch, x + 16, 192 + 36);
-		}
-		
-		int yOffset = (level.movesThisTurn()) * 26 + 2 ;
+		yOffset = (level.movesThisTurn()) * 26 + 2 ;
 		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - yOffset);
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
 			t.draw(batch, xOffset, Consts.height - yOffset - 16);
