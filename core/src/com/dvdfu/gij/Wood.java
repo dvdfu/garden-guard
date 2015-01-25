@@ -5,14 +5,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Pool.Poolable;
 import com.dvdfu.gij.components.SpriteComponent;
 
-public class Water implements Poolable {
+public class Wood implements Poolable {
 	SpriteComponent sprite;
 	float x, y, xSpeed, ySpeed;
 	boolean dead;
 	
-	public Water() {
-		sprite = new SpriteComponent(Consts.atlas.findRegion("water"), 4);
-		sprite.setFrameRate(2);
+	public Wood() {
+		sprite = new SpriteComponent(Consts.atlas.findRegion("wood"), 6);
+		sprite.setFrameRate(6);
 		reset();
 	}
 	
@@ -32,7 +32,8 @@ public class Water implements Poolable {
 
 	public void reset() {
 		dead = false;
-		ySpeed = MathUtils.random(-2f, -4f);
-		xSpeed = MathUtils.random(-1.5f, 1.5f);
+		sprite.setFrame(MathUtils.random(3));
+		ySpeed = MathUtils.random(1f, 3f);
+		xSpeed = MathUtils.random(-1f, 1f);
 	}
 }

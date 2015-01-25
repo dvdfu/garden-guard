@@ -9,8 +9,8 @@ public class Consts {
 	public static TextureAtlas atlas;
 	public static final BitmapFont BigFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
 	public static final BitmapFont SmallFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
-	public static final int width = 683;
-	public static final int height = 384;
+	public static int width = 683;
+	public static int height = 384;
 
 	public Consts() {
 		AssetManager manager = new AssetManager();

@@ -1,6 +1,5 @@
 package com.dvdfu.gij;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -9,11 +8,11 @@ import com.dvdfu.gij.components.SpriteComponent;
 
 public class Level {
 	public enum State {
-		ROUND_TEXT, GET_READY_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING, COUNTING
+		ROUND_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING, COUNTING
 	}
 	public State state;
 	int stateTimer;
-	final int width = 10;
+	final int width = 9;
 	int turn;
 	int turnMove;
 	public Player p1;
@@ -27,9 +26,10 @@ public class Level {
 	
 	Array<Water> water;
 	Pool<Water> waterPool;
-	
 	Array<Leaf> leaves;
 	Pool<Leaf> leafPool;
+	Array<Wood> wood;
+	Pool<Wood> woodPool;
 
 	public Level() {
 		p1 = new Player(this, 1);
@@ -45,6 +45,8 @@ public class Level {
 		for (int i = 0; i < width; i++) {
 			cells[i] = new Cell(this, i);
 		}
+		cells[0].setState(p1, Cell.State.SPROUT);
+		cells[width - 1].setState(p2, Cell.State.SPROUT);
 		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
 		water = new Array<Water>();
@@ -59,6 +61,12 @@ public class Level {
 				return new Leaf();
 			}
 		};
+		wood = new Array<Wood>();
+		woodPool = new Pool<Wood>() {
+			protected Wood newObject() {
+				return new Wood();
+			}
+		};
 		instr = new SpriteComponent(Consts.atlas.findRegion("instr"));
 	}
 	
@@ -70,13 +78,9 @@ public class Level {
 			Cell cell;
 			for (int i = 0; i < width; i++) {
 				cell = cells[i];
-				if (cell.state == Cell.State.TREE) {
+				if (cell.state == Cell.State.TREE || cell.state == Cell.State.SPROUT) {
 					fruit = true;
-					if (cell.owner.equals(p1)) {
-						p1.fruit++;
-					} else {
-						p2.fruit++;
-					}
+					cell.owner.fruit += cell.getValue();
 				}
 			}
 			p1.fruitsText.text = "" + p1.fruit;
@@ -86,10 +90,6 @@ public class Level {
 			} else {
 				switchState(State.ROUND_TEXT);
 			}
-			break;
-		case GET_READY_TEXT:
-			stateTimer = 60;
-			screenLabel.text = "Get Ready...";
 			break;
 		case GARDEN_TEXT:
 			stateTimer = 60;
@@ -105,8 +105,12 @@ public class Level {
 			turn++;
 			p1.newRound();
 			p2.newRound();
-			stateTimer = 60;
-			screenLabel.text = "Round " + turn;
+			stateTimer = 120;
+			if (turn == 6) {
+				screenLabel.text = "FINAL ROUND: Get ready!";
+			} else {
+				screenLabel.text = "ROUND " + turn + ": Get ready!";
+			}
 			break;
 		case WAITING:
 			break;
@@ -118,9 +122,6 @@ public class Level {
 	public void handleState() {
 		switch (state) {
 		case COUNTING:
-			handleTimer();
-			break;
-		case GET_READY_TEXT:
 			handleTimer();
 			break;
 		case GARDEN_TEXT:
@@ -166,9 +167,6 @@ public class Level {
 		case COUNTING:
 			switchState(State.ROUND_TEXT);
 			break;
-		case GET_READY_TEXT:
-			switchState(State.QUEUING);
-			break;
 		case GARDEN_TEXT:
 			switchState(State.PERFORMING);
 			break;
@@ -177,7 +175,7 @@ public class Level {
 		case QUEUING:
 			break;
 		case ROUND_TEXT:
-			switchState(State.GET_READY_TEXT);
+			switchState(State.QUEUING);
 			break;
 		case WAITING:
 			break;
@@ -201,6 +199,14 @@ public class Level {
 			if (leaves.get(i).dead) {
 				leafPool.free(leaves.get(i));
 				leaves.removeIndex(i);
+				i--;
+			}
+		}
+		for (int i = 0; i < wood.size; i++) {
+			wood.get(i).update();
+			if (wood.get(i).dead) {
+				woodPool.free(wood.get(i));
+				wood.removeIndex(i);
 				i--;
 			}
 		}
@@ -251,23 +257,24 @@ public class Level {
 	}
 
 	public void draw(SpriteBatch batch) {
-		if (state == State.GET_READY_TEXT || 
-			state == State.GARDEN_TEXT ||
+		if (state == State.GARDEN_TEXT ||
 			state == State.ROUND_TEXT) {
-			screenLabel.draw(batch, Gdx.graphics.getWidth() / 4, Gdx.graphics.getHeight() / 4 + 80);
+			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
 		}
 		for (int i = 0; i < width; i++) {
 			cells[i].draw(batch);
 		}
 		if (state == State.COUNTING) {
 			for (int i = 0; i < width; i++) {
-				if (cells[i].state == Cell.State.TREE) {
-					if (cells[i].owner.equals(p1)) {
+				Cell c = cells[i];
+				if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
+					if (c.owner.equals(p1)) {
 						incLabel.color.set(0.5f, 1, 0.7f, 1);
 					} else {
 						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
-					incLabel.draw(batch, Consts.width / 2 + (i + 0.5f - width / 2) * 32, 176 - stateTimer / 6);
+					incLabel.text = "+" + c.getValue();
+					incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
 				}
 			}
 		}
@@ -279,6 +286,9 @@ public class Level {
 		}
 		for (Leaf l : leaves) {
 			l.draw(batch);
+		}
+		for (Wood w : wood) {
+			w.draw(batch);
 		}
 		p1.draw(batch);
 		p2.draw(batch);

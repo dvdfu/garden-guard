@@ -1,5 +1,6 @@
 package com.dvdfu.gij.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.Consts;
@@ -19,7 +20,7 @@ public class MainScreen extends AbstractScreen {
 	public MainScreen(MainGame game) {
 		super(game);
 		batch = new SpriteBatch();
-		camera = new OrthographicCamera(Consts.width * 2, Consts.height * 2);
+		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.position.set(Consts.width / 2, Consts.height / 2, 0);
 		level = new Level();
 

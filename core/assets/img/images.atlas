@@ -6,169 +6,197 @@ filter: Nearest,Nearest
 repeat: none
 background
   rotate: false
-  xy: 2, 112
+  xy: 2, 118
   size: 683, 384
   orig: 683, 384
   offset: 0, 0
   index: -1
 hand
   rotate: false
-  xy: 438, 78
+  xy: 196, 18
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_axe
   rotate: false
-  xy: 438, 52
+  xy: 737, 410
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_move_left
   rotate: false
-  xy: 36, 10
+  xy: 504, 58
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_move_right
   rotate: false
-  xy: 787, 462
+  xy: 264, 26
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_selected
   rotate: false
-  xy: 687, 272
+  xy: 687, 310
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_sprout
   rotate: false
-  xy: 540, 86
+  xy: 805, 444
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_unknown
   rotate: false
-  xy: 464, 52
+  xy: 572, 92
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_water
   rotate: false
-  xy: 687, 246
+  xy: 763, 410
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 instr
   rotate: false
-  xy: 687, 432
+  xy: 388, 52
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 petal
   rotate: false
-  xy: 2, 36
+  xy: 881, 494
   size: 64, 8
   orig: 64, 8
   offset: 0, 0
   index: -1
 petal_red
   rotate: false
-  xy: 753, 488
+  xy: 2, 8
   size: 64, 8
   orig: 64, 8
   offset: 0, 0
   index: -1
 player
   rotate: false
-  xy: 566, 94
+  xy: 530, 66
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 sky
   rotate: false
-  xy: 687, 332
+  xy: 687, 370
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 slash
   rotate: false
-  xy: 2, 46
+  xy: 2, 52
   size: 384, 64
   orig: 384, 64
   offset: 0, 0
   index: -1
 soil
   rotate: false
-  xy: 2, 2
+  xy: 737, 436
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_out
   rotate: false
-  xy: 753, 454
+  xy: 504, 84
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_top
   rotate: false
-  xy: 472, 78
+  xy: 230, 18
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 sprout
   rotate: false
-  xy: 687, 298
+  xy: 687, 336
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
+sprout_open
+  rotate: false
+  xy: 687, 470
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
+sprout_open_red
+  rotate: false
+  xy: 2, 18
+  size: 192, 32
+  orig: 192, 32
+  offset: 0, 0
+  index: -1
 sprout_red
   rotate: false
-  xy: 506, 78
+  xy: 771, 436
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 test
   rotate: false
-  xy: 753, 436
+  xy: 881, 476
   size: 28, 16
   orig: 28, 16
   offset: 0, 0
   index: -1
 tree
   rotate: false
-  xy: 388, 46
+  xy: 687, 404
   size: 48, 64
   orig: 48, 64
   offset: 0, 0
   index: -1
 tree_red
   rotate: false
-  xy: 687, 366
+  xy: 454, 52
   size: 48, 64
   orig: 48, 64
   offset: 0, 0
   index: -1
+trunk
+  rotate: false
+  xy: 538, 84
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
 water
   rotate: false
-  xy: 68, 40
+  xy: 2, 2
   size: 16, 4
   orig: 16, 4
+  offset: 0, 0
+  index: -1
+wood
+  rotate: false
+  xy: 947, 496
+  size: 24, 6
+  orig: 24, 6
   offset: 0, 0
   index: -1

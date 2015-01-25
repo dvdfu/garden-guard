@@ -58,9 +58,11 @@ public class Player {
 		if (player == 1) {
 			sprite.setColor(0.5f, 1, 0.7f);
 			fruitsText.color.set(0.5f, 1, 0.7f, 1);
+			xCell = 2;
 		} else {
 			sprite.setColor(1, 0.7f, 0.5f);
 			fruitsText.color.set(1, 0.7f, 0.5f, 1);
+			xCell = level.width - 3;
 		}
 		iconUnknown = new SpriteComponent(Consts.atlas.findRegion("icon_unknown"));
 		iconMoveLeft = new SpriteComponent(Consts.atlas.findRegion("icon_move_left"));
@@ -81,7 +83,6 @@ public class Player {
 		keyUndo = GamepadComponent.Button.L;
 		keyReady = GamepadComponent.Button.R;
 		actionCurrent = Actions.NULL;
-		xCell = player == 1 ? 3 : level.width - 4;
 		x = Consts.width / 2 + (xCell - level.width / 2f) * 32;
 	}
 	
@@ -93,8 +94,6 @@ public class Player {
 		}
 		t.text = "P" + player + " Ready!";
 		switch (level.state) {
-		case GET_READY_TEXT:
-			break;
 		case GARDEN_TEXT:
 			break;
 		case PERFORMING:
@@ -147,6 +146,7 @@ public class Player {
 	}
 	
 	public void removeMove() {
+		if (actionQueue.size() <= level.movesThisTurn() / 2) return;
 		if (ready) return;
 		if (actionQueue.isEmpty()) return;
 		actionQueue.removeLast();
@@ -163,6 +163,16 @@ public class Player {
 		switch (action) {
 		case AXE:
 			cell.slash();
+			int i = cell.x - 1;
+			while (i >= 0 && level.cells[i].state == Cell.State.TREE) {
+				level.cells[i].slash();
+				i--;
+			}
+			i = cell.x + 1;
+			while (i < level.width && level.cells[i].state == Cell.State.TREE) {
+				level.cells[i].slash();
+				i++;
+			}
 			timer = moveTime;
 			break;
 		case WATER:
@@ -194,21 +204,33 @@ public class Player {
 				if (cell.state == Cell.State.SPROUT) {
 					cell.setState(cell.owner, Cell.State.TREE);
 				}
+				Cell oCell;
+				if (cell.x > 0) {
+					oCell = level.cells[cell.x - 1];
+					if (oCell.state == Cell.State.SPROUT) {
+						oCell.setState(oCell.owner, Cell.State.TREE);
+					}
+				}
+				if (cell.x < level.width - 1) {
+					oCell = level.cells[cell.x + 1];
+					if (oCell.state == Cell.State.SPROUT) {
+						oCell.setState(oCell.owner, Cell.State.TREE);
+					}
+				}
 				level.switchPlayer();
 				ready = true;
 			} else {
 				timer--;
-				Water w = level.waterPool.obtain();
-				w.x = x + 8 + MathUtils.random(16);
-				w.y = 192;
-				level.water.add(w);
+				for (int i = 0; i < 2; i++) {
+					Water w = level.waterPool.obtain();
+					w.x = x + 8 + MathUtils.random(16);
+					w.y = 192;
+					level.water.add(w);
+				}
 			}
 			break;
 		case AXE:
 			if (timer == 0) {
-				if (cell.state == Cell.State.TREE || cell.state == Cell.State.SPROUT) {
-					cell.setState(this, Cell.State.EMPTY);
-				}
 				level.switchPlayer();
 				ready = true;
 			} else {
@@ -218,15 +240,21 @@ public class Player {
 						Leaf l = level.leafPool.obtain();
 						l.x = x + 16;
 						l.y = 128;
-						l.setPlayer(player);
+						l.setPlayer(cell.owner.player);
 						level.leaves.add(l);
 					}
+				}
+				if (cell.state == Cell.State.TRUNK) {
+					Wood l = level.woodPool.obtain();
+					l.x = x + 16;
+					l.y = 96;
+					level.wood.add(l);
 				}
 			}
 			break;
 		case SPROUT:
 			if (timer == 0) {
-				if (cell.state != Cell.State.TREE) {
+				if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
 					cell.setState(this, Cell.State.SPROUT);
 				}
 				level.switchPlayer();
@@ -277,13 +305,13 @@ public class Player {
 			t.draw(batch, xOffset, Consts.height - yOffset - 16);
 		}
 		
-		for (int i = 2; i < level.movesThisTurn(); i++) {
+		for (int i = level.movesThisTurn() / 2; i < level.movesThisTurn(); i++) {
 			iconSelected.draw(batch, xOffset - iconSelected.getWidth() / 2, Consts.height - 2 - iconSelected.getHeight() - i * 26);
 		}
 		
 		for (int i = 0; i < actionQueue.size(); i++) {
 			SpriteComponent icon = iconUnknown;
-			if ((level.state != Level.State.QUEUING && level.state != Level.State.GARDEN_TEXT) || i < 2) {
+			if ((level.state != Level.State.QUEUING && level.state != Level.State.GARDEN_TEXT) || i < level.movesThisTurn() / 2) {
 				switch (actionQueue.get(i)) {
 				case AXE:
 					icon = iconAxe;
