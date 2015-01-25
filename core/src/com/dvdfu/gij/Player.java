@@ -21,7 +21,7 @@ public class Player {
 	public float x;
 	int player;
 	int fruit;
-	final int moveTime = 20;
+	final int moveTime = 60;
 	float cursorTime;
 	boolean useless;
 	
@@ -132,6 +132,7 @@ public class Player {
 		}
 		if (doneMoves() && level.gp.keyPressed(player - 1, keyReady)) {
 			ready = true;
+			Consts.ready.play();
 		}
 	}
 	
@@ -142,6 +143,7 @@ public class Player {
 	
 	public void addMove(Actions move) {
 		if (doneMoves()) return;
+		Consts.select.play();
 		actionQueue.add(move);
 	}
 	
@@ -149,6 +151,7 @@ public class Player {
 		if (actionQueue.size() <= level.movesThisTurn() / 2) return;
 		if (ready) return;
 		if (actionQueue.isEmpty()) return;
+		Consts.undo.play();
 		actionQueue.removeLast();
 	}
 	
@@ -199,12 +202,13 @@ public class Player {
 					useless = false;
 				}
 			}
-			timer = moveTime * 2;
+			timer = moveTime;
 			break;
 		case SPROUT:
 			useless = true;
 			if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
 				useless = false;
+				cell.setState(this, Cell.State.SPROUT);
 			}
 			timer = moveTime;
 			break;
@@ -230,25 +234,33 @@ public class Player {
 		switch (actionCurrent) {
 		case WATER:
 			if (timer == 0) {
-				if (cell.state == Cell.State.SPROUT) {
-					cell.setState(cell.owner, Cell.State.TREE);
-				}
-				Cell oCell;
-				if (cell.x > 0) {
-					oCell = level.cells[cell.x - 1];
-					if (oCell.state == Cell.State.SPROUT) {
-						oCell.setState(oCell.owner, Cell.State.TREE);
-					}
-				}
-				if (cell.x < level.width - 1) {
-					oCell = level.cells[cell.x + 1];
-					if (oCell.state == Cell.State.SPROUT) {
-						oCell.setState(oCell.owner, Cell.State.TREE);
-					}
-				}
 				level.switchPlayer();
 				ready = true;
 			} else {
+				if (timer == 30) {
+					if (!useless) {
+						Consts.tree.play();
+					}
+					if (cell.state == Cell.State.SPROUT) {
+						cell.setState(cell.owner, Cell.State.TREE);
+					}
+					Cell oCell;
+					if (cell.x > 0) {
+						oCell = level.cells[cell.x - 1];
+						if (oCell.state == Cell.State.SPROUT) {
+							oCell.setState(oCell.owner, Cell.State.TREE);
+						}
+					}
+					if (cell.x < level.width - 1) {
+						oCell = level.cells[cell.x + 1];
+						if (oCell.state == Cell.State.SPROUT) {
+							oCell.setState(oCell.owner, Cell.State.TREE);
+						}
+					}
+				}
+				if (timer % 10 == 0) {
+					Consts.water.play();
+				}
 				timer--;
 				for (int i = 0; i < 2; i++) {
 					Water w = level.waterPool.obtain();
@@ -273,19 +285,10 @@ public class Player {
 						level.leaves.add(l);
 					}
 				}
-				if (cell.state == Cell.State.TRUNK) {
-					Wood l = level.woodPool.obtain();
-					l.x = x + 16;
-					l.y = 96;
-					level.wood.add(l);
-				}
 			}
 			break;
 		case SPROUT:
 			if (timer == 0) {
-				if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
-					cell.setState(this, Cell.State.SPROUT);
-				}
 				level.switchPlayer();
 				ready = true;
 			} else {

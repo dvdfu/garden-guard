@@ -54,6 +54,7 @@ public class Cell {
 			break;
 		case SPROUT:
 			if (sprout.getFrame() == 5) {
+				Consts.sprout.play();
 				if (owner.equals(level.p1)) {
 					sprout.setImage(Consts.atlas.findRegion("sprout"));
 				} else {
@@ -80,6 +81,13 @@ public class Cell {
 				drawSlash = false;
 				if (state == State.TREE) setState(this.owner, State.TRUNK);
 				else if (state == State.TRUNK) setState(this.owner, State.EMPTY);
+				Consts.chop.play();
+				for (int i = 0; i < 20; i++) {
+					Wood l = level.woodPool.obtain();
+					l.x = drawX + 16;
+					l.y = 96;
+					level.wood.add(l);
+				}
 			}
 		}
 	}

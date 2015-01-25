@@ -101,6 +101,7 @@ public class Level {
 		this.state = state;
 		switch (state) {
 		case COUNTING:
+			Consts.count.play();
 			boolean fruit = false;
 			Cell cell;
 			for (int i = 0; i < width; i++) {
@@ -133,6 +134,7 @@ public class Level {
 		case QUEUING:
 			break;
 		case ROUND_TEXT:
+			Consts.round.play();
 			turn++;
 			p1.newRound();
 			p2.newRound();
