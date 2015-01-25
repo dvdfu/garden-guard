@@ -19,7 +19,7 @@ public class Leaf implements Poolable {
 	public void update() {
 		x += xSpeed;
 		y += ySpeed;
-		ySpeed -= 0.08f;
+		ySpeed -= 0.04f;
 		if (y + ySpeed < 92) {
 			dead = true;
 		}
@@ -41,7 +41,7 @@ public class Leaf implements Poolable {
 	public void reset() {
 		dead = false;
 		sprite.setFrame(MathUtils.random(3));
-		ySpeed = MathUtils.random(1f, 3f);
-		xSpeed = MathUtils.random(-1f, 1f);
+		ySpeed = MathUtils.random(2f);
+		xSpeed = MathUtils.random(-0.5f, 1f);
 	}
 }

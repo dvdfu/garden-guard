@@ -3,6 +3,7 @@ package com.dvdfu.gij.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.dvdfu.gij.Cloud;
 import com.dvdfu.gij.Consts;
 import com.dvdfu.gij.Level;
 import com.dvdfu.gij.MainGame;
@@ -16,6 +17,7 @@ public class MainScreen extends AbstractScreen {
 	SpriteComponent soilOut;
 	SpriteComponent sky;
 	SpriteComponent background;
+	Cloud cloud1, cloud2, cloud3;
 
 	public MainScreen(MainGame game) {
 		super(game);
@@ -29,14 +31,23 @@ public class MainScreen extends AbstractScreen {
 		sky = new SpriteComponent(Consts.atlas.findRegion("sky"));
 		sky.setSize(Consts.width, Consts.height);
 		background = new SpriteComponent(Consts.atlas.findRegion("background"));
+		cloud1 = new Cloud(1);
+		cloud2 = new Cloud(2);
+		cloud3 = new Cloud(3);
 	}
 
 	public void render(float delta) {
 		level.update();
+		cloud1.update();
+		cloud2.update();
+		cloud3.update();
 		camera.update();
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
 		background.draw(batch, 0, 0);
+		cloud3.draw(batch);
+		cloud2.draw(batch);
+		cloud1.draw(batch);
 		soilOut.draw(batch, 0, 0);
 		level.draw(batch);
 		batch.end();

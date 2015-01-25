@@ -8,11 +8,12 @@ import com.dvdfu.gij.components.SpriteComponent;
 
 public class Level {
 	public enum State {
-		ROUND_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, WAITING, COUNTING
+		ROUND_TEXT, QUEUING, GARDEN_TEXT, PERFORMING, COUNTING, VICTORY_TEXT
 	}
 	public State state;
 	int stateTimer;
 	final int width = 9;
+	int turnWin = 8;
 	int turn;
 	int turnMove;
 	public Player p1;
@@ -22,7 +23,7 @@ public class Level {
 	GamepadComponent gp;
 	Text screenLabel;
 	Text incLabel;
-	SpriteComponent instr;
+	Text instrLabel;
 	
 	Array<Water> water;
 	Pool<Water> waterPool;
@@ -30,6 +31,13 @@ public class Level {
 	Pool<Leaf> leafPool;
 	Array<Wood> wood;
 	Pool<Wood> woodPool;
+	
+	SpriteComponent buttonTri;
+	SpriteComponent buttonCir;
+	SpriteComponent buttonCro;
+	SpriteComponent buttonDPad;
+	SpriteComponent buttonL;
+	SpriteComponent buttonR;
 
 	public Level() {
 		p1 = new Player(this, 1);
@@ -39,8 +47,11 @@ public class Level {
 		screenLabel.centered = true;
 		incLabel = new Text("+1");
 		incLabel.centered = true;
-//		screenLabel.font.scale(1);
-//		screenLabel.bordered = false;
+		incLabel.font = Consts.SmallFont;
+		instrLabel = new Text();
+		instrLabel.font = Consts.SmallFont;
+		// screenLabel.font.scale(1);
+		// screenLabel.bordered = false;
 		cells = new Cell[width];
 		for (int i = 0; i < width; i++) {
 			cells[i] = new Cell(this, i);
@@ -67,7 +78,13 @@ public class Level {
 				return new Wood();
 			}
 		};
-		instr = new SpriteComponent(Consts.atlas.findRegion("instr"));
+		
+		buttonTri = new SpriteComponent(Consts.atlas.findRegion("button_tri"));
+		buttonCir = new SpriteComponent(Consts.atlas.findRegion("button_cir"));
+		buttonCro = new SpriteComponent(Consts.atlas.findRegion("button_cro"));
+		buttonDPad = new SpriteComponent(Consts.atlas.findRegion("button_dpad"));
+		buttonL = new SpriteComponent(Consts.atlas.findRegion("button_l1"));
+		buttonR = new SpriteComponent(Consts.atlas.findRegion("button_r1"));
 	}
 	
 	public void switchState(State state) {
@@ -88,7 +105,11 @@ public class Level {
 			if (fruit) {
 				stateTimer = 120;
 			} else {
-				switchState(State.ROUND_TEXT);
+				if (turn == turnWin) {
+					switchState(State.VICTORY_TEXT);
+				} else {
+					switchState(State.ROUND_TEXT);
+				}
 			}
 			break;
 		case GARDEN_TEXT:
@@ -105,14 +126,22 @@ public class Level {
 			turn++;
 			p1.newRound();
 			p2.newRound();
-			stateTimer = 120;
-			if (turn == 6) {
-				screenLabel.text = "FINAL ROUND: Get ready!";
+			stateTimer = 80;
+			if (turn == turnWin) {
+				screenLabel.text = "FINAL ROUND!";
 			} else {
-				screenLabel.text = "ROUND " + turn + ": Get ready!";
+				screenLabel.text = "ROUND " + turn + " / " + turnWin;
 			}
 			break;
-		case WAITING:
+		case VICTORY_TEXT:
+			int diff = p1.fruit - p2.fruit;
+			if (diff > 0) {
+				screenLabel.text = "PLAYER 1 WINS!";
+			} else if (diff == 0) {
+				screenLabel.text = "DRAW GAME!";
+			} else {
+				screenLabel.text = "PLAYER 2 WINS!";
+			}
 			break;
 		default:
 			break;
@@ -147,7 +176,7 @@ public class Level {
 		case ROUND_TEXT:
 			handleTimer();
 			break;
-		case WAITING:
+		case VICTORY_TEXT:
 			break;
 		default:
 			break;
@@ -165,7 +194,11 @@ public class Level {
 	public void timeUp() {
 		switch (state) {
 		case COUNTING:
-			switchState(State.ROUND_TEXT);
+			if (turn == turnWin) {
+				switchState(State.VICTORY_TEXT);
+			} else {
+				switchState(State.ROUND_TEXT);
+			}
 			break;
 		case GARDEN_TEXT:
 			switchState(State.PERFORMING);
@@ -177,7 +210,7 @@ public class Level {
 		case ROUND_TEXT:
 			switchState(State.QUEUING);
 			break;
-		case WAITING:
+		case VICTORY_TEXT:
 			break;
 		default:
 			break;
@@ -257,32 +290,8 @@ public class Level {
 	}
 
 	public void draw(SpriteBatch batch) {
-		if (state == State.GARDEN_TEXT ||
-			state == State.ROUND_TEXT) {
-			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
-		}
 		for (int i = 0; i < width; i++) {
 			cells[i].draw(batch);
-		}
-		if (state == State.COUNTING) {
-			for (int i = 0; i < width; i++) {
-				Cell c = cells[i];
-				if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
-					if (c.owner.equals(p1)) {
-						incLabel.color.set(0.5f, 1, 0.7f, 1);
-					} else {
-						incLabel.color.set(1, 0.7f, 0.5f, 1);
-					}
-					incLabel.text = "+" + c.getValue();
-					incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
-				}
-			}
-		}
-		if (state == State.QUEUING) {
-			// instr.drawCentered(batch, Consts.width / 2, Consts.height / 2);
-		}
-		for (Water w : water) {
-			w.draw(batch);
 		}
 		for (Leaf l : leaves) {
 			l.draw(batch);
@@ -290,8 +299,57 @@ public class Level {
 		for (Wood w : wood) {
 			w.draw(batch);
 		}
+		for (Water w : water) {
+			w.draw(batch);
+		}
 		p1.draw(batch);
 		p2.draw(batch);
+		if (state == State.QUEUING) {
+			int xx = 48;
+			instrLabel.color.set(0.5f, 1, 0.7f, 1);
+			instrLabel.text = "Sprout";
+			instrLabel.draw(batch, xx, 70);
+			buttonTri.draw(batch, xx - 18, 70 - 12);
+			instrLabel.color.set(1, 0.7f, 0.5f, 1);
+			instrLabel.text = "Water";
+			instrLabel.draw(batch, xx, 54);
+			buttonCir.draw(batch, xx - 18, 54 - 12);
+			instrLabel.color.set(0.5f, 0.7f, 1, 1);
+			instrLabel.text = "Axe";
+			instrLabel.draw(batch, xx, 38);
+			buttonCro.draw(batch, xx - 18, 38 - 12);
+			
+			xx = 128;
+			instrLabel.color.set(1, 1, 1, 1);
+			instrLabel.text = "Move";
+			instrLabel.draw(batch, xx, 70);
+			buttonDPad.draw(batch, xx - 18, 70 - 12);
+			instrLabel.text = "Undo";
+			instrLabel.draw(batch, xx, 54);
+			buttonL.draw(batch, xx - 18, 54 - 12);
+			instrLabel.text = "Ready";
+			instrLabel.draw(batch, xx, 38);
+			buttonR.draw(batch, xx - 18, 38 - 12);
+		}
+		if (state == State.GARDEN_TEXT ||
+				state == State.ROUND_TEXT ||
+				state == State.VICTORY_TEXT) {
+				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
+			}
+			if (state == State.COUNTING) {
+				for (int i = 0; i < width; i++) {
+					Cell c = cells[i];
+					if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
+						if (c.owner.equals(p1)) {
+							incLabel.color.set(0.5f, 1, 0.7f, 1);
+						} else {
+							incLabel.color.set(1, 0.7f, 0.5f, 1);
+						}
+						incLabel.text = "+" + c.getValue();
+						incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
+					}
+				}
+			}
 	}
 	
 	public int movesThisTurn() {

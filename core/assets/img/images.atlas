@@ -6,196 +6,259 @@ filter: Nearest,Nearest
 repeat: none
 background
   rotate: false
-  xy: 2, 118
+  xy: 2, 117
   size: 683, 384
   orig: 683, 384
   offset: 0, 0
   index: -1
+button_cir
+  rotate: false
+  xy: 414, 65
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_cro
+  rotate: false
+  xy: 952, 419
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_dpad
+  rotate: false
+  xy: 687, 186
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_l1
+  rotate: false
+  xy: 797, 312
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_r1
+  rotate: false
+  xy: 253, 23
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+button_tri
+  rotate: false
+  xy: 432, 65
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+cloud1
+  rotate: false
+  xy: 687, 411
+  size: 237, 90
+  orig: 237, 90
+  offset: 0, 0
+  index: -1
+cloud2
+  rotate: false
+  xy: 687, 330
+  size: 156, 45
+  orig: 156, 45
+  offset: 0, 0
+  index: -1
+cloud3
+  rotate: false
+  xy: 2, 20
+  size: 219, 29
+  orig: 219, 29
+  offset: 0, 0
+  index: -1
 hand
   rotate: false
-  xy: 196, 18
+  xy: 582, 83
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 icon_axe
   rotate: false
-  xy: 737, 410
+  xy: 388, 57
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_move_left
   rotate: false
-  xy: 504, 58
+  xy: 926, 411
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_move_right
   rotate: false
-  xy: 264, 26
+  xy: 915, 385
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+icon_public
+  rotate: false
+  xy: 976, 443
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_selected
   rotate: false
-  xy: 687, 310
+  xy: 687, 204
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_sprout
   rotate: false
-  xy: 805, 444
+  xy: 737, 270
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_unknown
   rotate: false
-  xy: 572, 92
+  xy: 771, 304
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 icon_water
   rotate: false
-  xy: 763, 410
+  xy: 650, 91
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
-instr
-  rotate: false
-  xy: 388, 52
-  size: 64, 64
-  orig: 64, 64
-  offset: 0, 0
-  index: -1
 petal
   rotate: false
-  xy: 881, 494
+  xy: 2, 10
   size: 64, 8
   orig: 64, 8
   offset: 0, 0
   index: -1
 petal_red
   rotate: false
-  xy: 2, 8
+  xy: 223, 41
   size: 64, 8
   orig: 64, 8
   offset: 0, 0
   index: -1
 player
   rotate: false
-  xy: 530, 66
+  xy: 687, 168
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 sky
   rotate: false
-  xy: 687, 370
+  xy: 881, 377
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 slash
   rotate: false
-  xy: 2, 52
+  xy: 2, 51
   size: 384, 64
   orig: 384, 64
   offset: 0, 0
   index: -1
 soil
   rotate: false
-  xy: 737, 436
+  xy: 845, 343
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_out
   rotate: false
-  xy: 504, 84
+  xy: 976, 469
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 soil_top
   rotate: false
-  xy: 230, 18
+  xy: 687, 230
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 sprout
   rotate: false
-  xy: 687, 336
+  xy: 737, 296
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 sprout_open
   rotate: false
-  xy: 687, 470
+  xy: 388, 83
   size: 192, 32
   orig: 192, 32
   offset: 0, 0
   index: -1
 sprout_open_red
   rotate: false
-  xy: 2, 18
+  xy: 687, 377
   size: 192, 32
   orig: 192, 32
   offset: 0, 0
   index: -1
 sprout_red
   rotate: false
-  xy: 771, 436
+  xy: 616, 83
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 test
   rotate: false
-  xy: 881, 476
+  xy: 223, 23
   size: 28, 16
   orig: 28, 16
   offset: 0, 0
   index: -1
 tree
   rotate: false
-  xy: 687, 404
+  xy: 926, 437
   size: 48, 64
   orig: 48, 64
   offset: 0, 0
   index: -1
 tree_red
   rotate: false
-  xy: 454, 52
+  xy: 687, 264
   size: 48, 64
   orig: 48, 64
   offset: 0, 0
   index: -1
 trunk
   rotate: false
-  xy: 538, 84
+  xy: 879, 343
   size: 32, 32
   orig: 32, 32
   offset: 0, 0
   index: -1
 water
   rotate: false
-  xy: 2, 2
+  xy: 68, 14
   size: 16, 4
   orig: 16, 4
   offset: 0, 0
   index: -1
 wood
   rotate: false
-  xy: 947, 496
+  xy: 2, 2
   size: 24, 6
   orig: 24, 6
   offset: 0, 0

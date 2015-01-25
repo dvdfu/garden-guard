@@ -25,11 +25,11 @@ public class Player {
 	float cursorTime;
 	
 	SpriteComponent sprite;
-	SpriteComponent menuTray;
 	SpriteComponent iconUnknown;
 	SpriteComponent iconMoveLeft;
 	SpriteComponent iconMoveRight;
 	SpriteComponent iconSprout;
+	SpriteComponent iconPublic;
 	SpriteComponent iconSelected;
 	SpriteComponent iconWater;
 	SpriteComponent iconAxe;
@@ -53,8 +53,6 @@ public class Player {
 		fruitsText.font = Consts.SmallFont;
 		fruitsText.centered = true;
 		fruitsText.text = "0";
-		menuTray = new SpriteComponent(Consts.atlas.findRegion("test"));
-		menuTray.setSize(28, Consts.height);
 		if (player == 1) {
 			sprite.setColor(0.5f, 1, 0.7f);
 			fruitsText.color.set(0.5f, 1, 0.7f, 1);
@@ -70,6 +68,7 @@ public class Player {
 		iconSprout = new SpriteComponent(Consts.atlas.findRegion("icon_sprout"));
 		iconWater = new SpriteComponent(Consts.atlas.findRegion("icon_water"));
 		iconAxe = new SpriteComponent(Consts.atlas.findRegion("icon_axe"));
+		iconPublic = new SpriteComponent(Consts.atlas.findRegion("icon_public"));
 		iconSelected = new SpriteComponent(Consts.atlas.findRegion("icon_selected"));
 		actionQueue = new LinkedList<Actions>();
 		t = new Text();
@@ -104,7 +103,7 @@ public class Player {
 			break;
 		case ROUND_TEXT:
 			break;
-		case WAITING:
+		case VICTORY_TEXT:
 			break;
 		default:
 			break;
@@ -299,14 +298,16 @@ public class Player {
 		sprite.draw(batch, x, 192 + yOffset);
 
 		int xOffset = player == 1? 160: Consts.width - 160;
-		yOffset = (level.movesThisTurn()) * 26 + 2 ;
-		menuTray.draw(batch, xOffset - menuTray.getWidth() / 2, Consts.height - yOffset);
+		yOffset = Consts.height - 2 - 24;
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
-			t.draw(batch, xOffset, Consts.height - yOffset - 16);
+			t.draw(batch, xOffset + (player == 1 ? -64 : 64), yOffset - actionQueue.size() * 26  + 13);
 		}
-		
-		for (int i = level.movesThisTurn() / 2; i < level.movesThisTurn(); i++) {
-			iconSelected.draw(batch, xOffset - iconSelected.getWidth() / 2, Consts.height - 2 - iconSelected.getHeight() - i * 26);
+		for (int i = 0; i < level.movesThisTurn(); i++) {
+			if (i < level.movesThisTurn() / 2) {
+				iconPublic.draw(batch, xOffset - iconPublic.getWidth() / 2, yOffset - iconPublic.getHeight() - i * 26);
+			} else {
+				iconSelected.draw(batch, xOffset - iconSelected.getWidth() / 2, yOffset - iconSelected.getHeight() - i * 26);
+			}
 		}
 		
 		for (int i = 0; i < actionQueue.size(); i++) {
@@ -332,7 +333,7 @@ public class Player {
 					break;
 				}
 			}
-			icon.draw(batch, xOffset - icon.getWidth() / 2, Consts.height - 2 - icon.getHeight() - i * 26);
+			icon.draw(batch, xOffset - icon.getWidth() / 2, yOffset - icon.getHeight() - i * 26);
 		}
 	}
 }
