@@ -168,7 +168,7 @@ public class Cell extends Unit {
 		int v = 0;
 		if (state == State.SPROUT) v = 1;
 		if (state == State.TREE) v = 2;
-		if (golden) v++;
+		if (golden) v *= 2;
 		return v;
 	}
 }

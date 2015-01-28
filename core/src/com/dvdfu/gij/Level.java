@@ -41,15 +41,13 @@ public class Level {
 		p1 = new Player(this, 1);
 		p2 = new Player(this, 2);
 		pT = p1;
-		screenLabel = new Text();
+		screenLabel = new Text("8b");
 		screenLabel.centered = true;
-		incLabel = new Text("+1");
-		incLabel.centered = true;
-		incLabel.font = Consts.SmallFont;
-		instrLabel = new Text();
-		instrLabel.font = Consts.SmallFont;
 		// screenLabel.font.scale(1);
 		// screenLabel.bordered = false;
+		incLabel = new Text("8b");
+		incLabel.centered = true;
+		instrLabel = new Text("8b");
 		cells = new Cell[size];
 		for (int i = 0; i < size; i++) {
 			cells[i] = new Cell(this, i);
@@ -116,7 +114,7 @@ public class Level {
 			if (turn == turnWin) {
 				screenLabel.text = "FINAL ROUND!";
 			} else {
-				screenLabel.text = "ROUND " + turn + " / " + turnWin;
+				screenLabel.text = "ROUND " + turn + " of " + turnWin;
 			}
 			break;
 		case VICTORY_TEXT:
@@ -150,7 +148,7 @@ public class Level {
 				return;
 			}
 			if (pT.ready) {
-				if (turnMove / 2 > pT.actionQueue.size()) {
+				if (turnMove >= pT.actionQueue.size() * 2) {
 					switchPlayer();
 				} else {
 					pT.startAction(pT.actionQueue.get(turnMove / 2));
@@ -200,6 +198,8 @@ public class Level {
 	}
 
 	public void update() {
+		p1.update();
+		p2.update();
 		handleState();
 		if (celebration) {
 			Particle p = particlePool.obtain();
@@ -219,8 +219,6 @@ public class Level {
 		for (int i = 0; i < size; i++) {
 			cells[i].update();
 		}
-		p1.update();
-		p2.update();
 		gp.update();
 	}
 	
@@ -272,8 +270,7 @@ public class Level {
 				state == State.ROUND_TEXT ||
 				state == State.VICTORY_TEXT) {
 			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
-		}
-		if (state == State.PERFORMING) {
+		} else if (state == State.PERFORMING) {
 			if (pT.equals(p1)) {
 				screenLabel.color.set(0.5f, 1, 0.7f, 1);
 			} else {
@@ -283,7 +280,7 @@ public class Level {
 			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
 			screenLabel.color.set(1, 1, 1, 1);
 			if (pT.useless) {
-				screenLabel.text = "(it was useless)";
+				screenLabel.text = "but it was useless";
 				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 112);
 			}
 		}
@@ -296,8 +293,9 @@ public class Level {
 					} else {
 						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
+					int yy = c.state == Cell.State.TREE ? 176 : 128;
 					incLabel.text = "+" + c.getPointValue();
-					incLabel.draw(batch, Consts.width / 2 + (i - size / 2) * 32, 176 - stateTimer / 6);
+					incLabel.draw(batch, Consts.width / 2 + (i - size / 2) * 32, yy - stateTimer / 6);
 				}
 			}
 		}

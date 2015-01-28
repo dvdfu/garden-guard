@@ -45,17 +45,18 @@ public class Player extends Unit {
 	private Button keyUndo;
 	private Button keyReady;
 	
-	Text t;
+	Text readyText;
 	Text fruitsText;
 	
 	public Player(Level level, int player) {
 		super(level);
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
-		fruitsText = new Text();
-		fruitsText.font = Consts.SmallFont;
+		fruitsText = new Text("8b");
 		fruitsText.centered = true;
 		fruitsText.text = "0";
+		readyText = new Text("8b");
+		readyText.centered = true;
 		if (player == 1) {
 			sprite.setColor(0.5f, 1, 0.7f);
 			fruitsText.color.set(0.5f, 1, 0.7f, 1);
@@ -74,9 +75,6 @@ public class Player extends Unit {
 		iconPublic = new SpriteComponent(Consts.atlas.findRegion("icon_public"));
 		iconSelected = new SpriteComponent(Consts.atlas.findRegion("icon_selected"));
 		actionQueue = new LinkedList<Actions>();
-		t = new Text();
-		t.font = Consts.SmallFont;
-		t.centered = true;
 		keyRight = GamepadComponent.Button.RIGHT;
 		keyLeft = GamepadComponent.Button.LEFT;
 		keySprout = GamepadComponent.Button.TRI;
@@ -94,7 +92,7 @@ public class Player extends Unit {
 		} else {
 			cursorTime += 0.01f;
 		}
-		t.text = "P" + player + " Ready!";
+		readyText.text = "P" + player + " Ready!";
 		switch (level.state) {
 		case PERFORMING:
 			if (!ready) {
@@ -181,31 +179,19 @@ public class Player extends Unit {
 		case AXE:
 			useless = true;
 			cell.slash();
-			if (cell.state == Cell.State.TREE) {
-				if (cell.owner.xCell != cell.xCell || cell.owner.equals(this)) {
+			if (cell.state == Cell.State.TREE || cell.state == Cell.State.TRUNK) {
+				if (cell.state == Cell.State.TRUNK || cell.owner.equals(this) || cell.owner.xCell != cell.xCell) {
 					useless = false;
 					int i = cell.xCell - 1;
-					while (i >= 0 && level.getState(i) == Cell.State.TREE && level.cells[i].owner == cell.owner) {
+					while (i >= 0 && level.getState(i) == cell.state && level.cells[i].owner == cell.owner) {
 						level.cells[i].slash();
 						i--;
 					}
 					i = cell.xCell + 1;
-					while (i < level.size && level.getState(i) == Cell.State.TREE && level.cells[i].owner == cell.owner) {
+					while (i < level.size && level.getState(i) == cell.state && level.cells[i].owner == cell.owner) {
 						level.cells[i].slash();
 						i++;
 					}
-				}
-			} else if (cell.state == Cell.State.TRUNK) {
-				useless = false;
-				int i = cell.xCell - 1;
-				while (i >= 0 && level.getState(i) == Cell.State.TRUNK) {
-					level.cells[i].slash();
-					i--;
-				}
-				i = cell.xCell + 1;
-				while (i < level.size && level.getState(i) == Cell.State.TRUNK) {
-					level.cells[i].slash();
-					i++;
 				}
 			}
 			timer = moveTime;
@@ -323,7 +309,7 @@ public class Player extends Unit {
 		int xOffset = player == 1? 160: Consts.width - 160;
 		yOffset = Consts.height - 2 - 24;
 		if ((level.state == Level.State.GARDEN_TEXT || level.state == Level.State.QUEUING) && ready) {
-			t.draw(batch, xOffset + (player == 1 ? -64 : 64), yOffset - actionQueue.size() * 26  + 13);
+			readyText.draw(batch, xOffset + (player == 1 ? -64 : 64), yOffset - actionQueue.size() * 26  + 13);
 		}
 		for (int i = 0; i < level.movesThisTurn(); i++) {
 			if (i < level.movesThisTurn() / 2) {
