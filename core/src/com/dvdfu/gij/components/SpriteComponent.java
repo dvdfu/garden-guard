@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 public class SpriteComponent {
 	protected ImageComponent image;
 	protected boolean animates;
-	protected float alpha;
+	protected int timesPlayed;
 	protected float angle;
 	protected Color color;
 	protected float originX, originY;
@@ -27,7 +27,6 @@ public class SpriteComponent {
 	
 	public SpriteComponent(ImageComponent image) {
 		setImage(image);
-		alpha = 1;
 		color = new Color(1, 1, 1, 1);
 		frameRate = 15;
 	}
@@ -38,14 +37,17 @@ public class SpriteComponent {
 			if (count >= frameRate) {
 				count = 0;
 				frame++;
-				frame %= image.getLength();
+				while (frame >= image.getLength()) {
+					timesPlayed++;
+					frame -= image.getLength();
+				}
 			}
 		}
 	}
 	
 	public void draw(SpriteBatch batch, float x, float y) {
 		Color c = batch.getColor();
-		batch.setColor(color.r, color.g, color.b, alpha);
+		batch.setColor(color);
 		batch.draw(image.getFrame(frame), x, y, originX, originY, width, height, scaleX, scaleY, angle);
 		batch.setColor(c);
 	}
@@ -66,8 +68,22 @@ public class SpriteComponent {
 		return height;
 	}
 	
+	public int getFrame() {
+		return frame;
+	}
+	
+	public int getTimesPlayed() {
+		return timesPlayed;
+	}
+	
+	public void reset() {
+		timesPlayed = 0;
+		count = 0;
+		frame = 0;
+	}
+	
 	public void setAlpha(float alpha) {
-		this.alpha = alpha;
+		color.a = alpha;
 	}
 	
 	public void setAngle(float angle) {
@@ -89,10 +105,6 @@ public class SpriteComponent {
 		count = 0;
 	}
 	
-	public int getFrame() {
-		return frame;
-	}
-	
 	public void setFrameRate(int frameRate) {
 		this.frameRate = frameRate;
 	}
@@ -108,8 +120,10 @@ public class SpriteComponent {
 	
 	public void setImage(ImageComponent image) {
 		this.image = image;
+		animates = false;
 		frame = 0;
 		count = 0;
+		timesPlayed = 0;
 		width = image.getWidth();
 		height = image.getHeight();
 		originX = width / 2;

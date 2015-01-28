@@ -3,6 +3,8 @@ package com.dvdfu.gij.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dvdfu.gij.Cloud;
 import com.dvdfu.gij.Consts;
 import com.dvdfu.gij.Level;
@@ -13,6 +15,7 @@ public class MainScreen extends AbstractScreen {
 	SpriteBatch batch;
 	OrthographicCamera camera;
 	Level level;
+	Viewport viewport;
 
 	SpriteComponent soilOut;
 	SpriteComponent sky;
@@ -23,6 +26,7 @@ public class MainScreen extends AbstractScreen {
 		super(game);
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		viewport = new ScreenViewport(camera);
 		camera.position.set(Consts.width / 2, Consts.height / 2, 0);
 		level = new Level();
 
@@ -54,6 +58,8 @@ public class MainScreen extends AbstractScreen {
 	}
 
 	public void resize(int width, int height) {
+		viewport.update(width, height);
+		camera.position.set(width / 4, height / 4, 0);
 	}
 
 	public void show() {

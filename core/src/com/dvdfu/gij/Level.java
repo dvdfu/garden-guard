@@ -12,7 +12,7 @@ public class Level {
 	}
 	public State state;
 	int stateTimer;
-	final int width = 9;
+	final int size = 9;
 	int turnWin = 6;
 	int turn;
 	int turnMove;
@@ -25,14 +25,8 @@ public class Level {
 	Text incLabel;
 	Text instrLabel;
 	
-	Array<Water> water;
-	Pool<Water> waterPool;
-	Array<Leaf> leaves;
-	Pool<Leaf> leafPool;
-	Array<Wood> wood;
-	Pool<Wood> woodPool;
-	Array<Star> stars;
-	Pool<Star> starPool;
+	Array<Particle> particles;
+	Pool<Particle> particlePool;
 	
 	SpriteComponent buttonTri;
 	SpriteComponent buttonCir;
@@ -56,36 +50,18 @@ public class Level {
 		instrLabel.font = Consts.SmallFont;
 		// screenLabel.font.scale(1);
 		// screenLabel.bordered = false;
-		cells = new Cell[width];
-		for (int i = 0; i < width; i++) {
+		cells = new Cell[size];
+		for (int i = 0; i < size; i++) {
 			cells[i] = new Cell(this, i);
 		}
 		cells[0].setState(p1, Cell.State.SPROUT);
-		cells[width - 1].setState(p2, Cell.State.SPROUT);
+		cells[size - 1].setState(p2, Cell.State.SPROUT);
 		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
-		water = new Array<Water>();
-		waterPool = new Pool<Water>() {
-			protected Water newObject() {
-				return new Water();
-			}
-		};
-		leaves = new Array<Leaf>();
-		leafPool = new Pool<Leaf>() {
-			protected Leaf newObject() {
-				return new Leaf();
-			}
-		};
-		wood = new Array<Wood>();
-		woodPool = new Pool<Wood>() {
-			protected Wood newObject() {
-				return new Wood();
-			}
-		};
-		stars = new Array<Star>();
-		starPool = new Pool<Star>() {
-			protected Star newObject() {
-				return new Star();
+		particles = new Array<Particle>();
+		particlePool = new Pool<Particle>() {
+			protected Particle newObject() {
+				return new Particle();
 			}
 		};
 		
@@ -104,11 +80,11 @@ public class Level {
 			Consts.count.play();
 			boolean fruit = false;
 			Cell cell;
-			for (int i = 0; i < width; i++) {
+			for (int i = 0; i < size; i++) {
 				cell = cells[i];
 				if (cell.state == Cell.State.TREE || cell.state == Cell.State.SPROUT) {
 					fruit = true;
-					cell.owner.fruit += cell.getValue();
+					cell.owner.fruit += cell.getPointValue();
 				}
 			}
 			p1.fruitsText.text = "" + p1.fruit;
@@ -234,42 +210,22 @@ public class Level {
 	public void update() {
 		handleState();
 		if (celebration) {
-			Star s = starPool.obtain();
-			s.x = Consts.width / 2;
-			s.y = Consts.height / 2 + 128;
-			stars.add(s);
+			Particle p = particlePool.obtain();
+			p.setType(Particle.Type.STAR);
+			p.x = Consts.width / 2;
+			p.y = Consts.height / 2 + 128;
+			particles.add(p);
 		}
-		for (int i = 0; i < water.size; i++) {
-			water.get(i).update();
-			if (water.get(i).dead) {
-				waterPool.free(water.get(i));
-				water.removeIndex(i);
+		for (int i = 0; i < particles.size; i++) {
+			particles.get(i).update();
+			if (particles.get(i).dead) {
+				particlePool.free(particles.get(i));
+				particles.removeIndex(i);
 				i--;
 			}
 		}
-		for (int i = 0; i < leaves.size; i++) {
-			leaves.get(i).update();
-			if (leaves.get(i).dead) {
-				leafPool.free(leaves.get(i));
-				leaves.removeIndex(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < wood.size; i++) {
-			wood.get(i).update();
-			if (wood.get(i).dead) {
-				woodPool.free(wood.get(i));
-				wood.removeIndex(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < stars.size; i++) {
-			stars.get(i).update();
-			if (stars.get(i).dead) {
-				starPool.free(stars.get(i));
-				stars.removeIndex(i);
-				i--;
-			}
+		for (int i = 0; i < size; i++) {
+			cells[i].update();
 		}
 		p1.update();
 		p2.update();
@@ -285,20 +241,11 @@ public class Level {
 	}
 
 	public void draw(SpriteBatch batch) {
-		for (int i = 0; i < width; i++) {
+		for (int i = 0; i < size; i++) {
 			cells[i].draw(batch);
 		}
-		for (Leaf l : leaves) {
-			l.draw(batch);
-		}
-		for (Wood w : wood) {
-			w.draw(batch);
-		}
-		for (Water w : water) {
-			w.draw(batch);
-		}
-		for (Star w : stars) {
-			w.draw(batch);
+		for (Particle p : particles) {
+			p.draw(batch);
 		}
 		p1.draw(batch);
 		p2.draw(batch);
@@ -349,7 +296,7 @@ public class Level {
 			}
 		}
 		if (state == State.COUNTING) {
-			for (int i = 0; i < width; i++) {
+			for (int i = 0; i < size; i++) {
 				Cell c = cells[i];
 				if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
 					if (c.owner.equals(p1)) {
@@ -357,8 +304,8 @@ public class Level {
 					} else {
 						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
-					incLabel.text = "+" + c.getValue();
-					incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
+					incLabel.text = "+" + c.getPointValue();
+					incLabel.draw(batch, Consts.width / 2 + (i - size / 2) * 32, 176 - stateTimer / 6);
 				}
 			}
 		}

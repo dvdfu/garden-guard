@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class Consts {
 	public static TextureAtlas atlas;
-	public static final BitmapFont BigFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
-	public static final BitmapFont SmallFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
+	public static BitmapFont BigFont;
+	public static BitmapFont SmallFont;
 	public static int width = 683;
 	public static int height = 384;
 	public static Sound chop;
@@ -25,6 +25,8 @@ public class Consts {
 	public Consts() {
 		AssetManager manager = new AssetManager();
 		atlas = new TextureAtlas();
+		BigFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
+		SmallFont = new BitmapFont(Gdx.files.internal("data/test.fnt"));
 		manager.load("img/images.atlas", TextureAtlas.class);
 		manager.load("sfx/chop.wav", Sound.class);
 		manager.load("sfx/count.wav", Sound.class);
