@@ -56,7 +56,7 @@ public class Level {
 		}
 		cells[0].setState(p1, Cell.State.SPROUT);
 		cells[size - 1].setState(p2, Cell.State.SPROUT);
-		switchState(State.ROUND_TEXT);
+		setState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
 		particles = new Array<Particle>();
 		particlePool = new Pool<Particle>() {
@@ -73,7 +73,7 @@ public class Level {
 		buttonR = new SpriteComponent(Consts.atlas.findRegion("button_r1"));
 	}
 	
-	public void switchState(State state) {
+	public void setState(State state) {
 		this.state = state;
 		switch (state) {
 		case COUNTING:
@@ -93,9 +93,9 @@ public class Level {
 				stateTimer = 120;
 			} else {
 				if (turn == turnWin) {
-					switchState(State.VICTORY_TEXT);
+					setState(State.VICTORY_TEXT);
 				} else {
-					switchState(State.ROUND_TEXT);
+					setState(State.ROUND_TEXT);
 				}
 			}
 			break;
@@ -106,8 +106,6 @@ public class Level {
 		case PERFORMING:
 			stateTimer = 0;
 			turnMove = 0;
-			break;
-		case QUEUING:
 			break;
 		case ROUND_TEXT:
 			Consts.round.play();
@@ -148,7 +146,7 @@ public class Level {
 			break;
 		case PERFORMING:
 			if (turnMove >= movesThisTurn() * 2 && p1.ready && p2.ready) {
-				switchState(State.COUNTING);
+				setState(State.COUNTING);
 				return;
 			}
 			if (pT.ready) {
@@ -161,7 +159,7 @@ public class Level {
 			}
 			break;
 		case QUEUING:
-			if (p1.ready && p2.ready) switchState(State.GARDEN_TEXT);
+			if (p1.ready && p2.ready) setState(State.GARDEN_TEXT);
 			break;
 		case ROUND_TEXT:
 			handleTimer();
@@ -185,22 +183,16 @@ public class Level {
 		switch (state) {
 		case COUNTING:
 			if (turn == turnWin) {
-				switchState(State.VICTORY_TEXT);
+				setState(State.VICTORY_TEXT);
 			} else {
-				switchState(State.ROUND_TEXT);
+				setState(State.ROUND_TEXT);
 			}
 			break;
 		case GARDEN_TEXT:
-			switchState(State.PERFORMING);
-			break;
-		case PERFORMING:
-			break;
-		case QUEUING:
+			setState(State.PERFORMING);
 			break;
 		case ROUND_TEXT:
-			switchState(State.QUEUING);
-			break;
-		case VICTORY_TEXT:
+			setState(State.QUEUING);
 			break;
 		default:
 			break;
@@ -309,6 +301,11 @@ public class Level {
 				}
 			}
 		}
+	}
+	
+	public Cell.State getState(int xCell) {
+		if (xCell < 0 || xCell >= size) return Cell.State.EMPTY;
+		return cells[xCell].state;
 	}
 	
 	public int movesThisTurn() {

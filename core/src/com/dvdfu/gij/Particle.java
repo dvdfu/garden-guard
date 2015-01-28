@@ -8,15 +8,14 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Particle implements Poolable {
-	enum Type {
-		NULL, WOOD, LEAF_GREEN, LEAF_RED, WATER, STAR
-	}
-	Type type;
-	SpriteComponent sprite;
-	
-	float x, y, xSpeed, ySpeed, yAccel;
-	float timer;
-	boolean dead;
+	public enum Type { NULL, WOOD, LEAF_GREEN, LEAF_RED, WATER, STAR }
+	public Type type;
+	public float x, y;
+	public boolean dead;
+
+	private SpriteComponent sprite;
+	private float xSpeed, ySpeed, yAccel;
+	private float timer;
 	
 	public Particle() {
 		type = Type.NULL;
@@ -48,8 +47,14 @@ public class Particle implements Poolable {
 			break;
 		case WOOD:
 			if (y + ySpeed < 96) {
-				dead = true;
+				if (timer >= 60) {
+					dead = true;
+				} else {
+					y = 96;
+					ySpeed *= -0.7f;
+				}
 			}
+			timer++;
 			break;
 		default:
 			break;
@@ -95,9 +100,9 @@ public class Particle implements Poolable {
 		case WATER:
 			sprite = new SpriteComponent(Consts.atlas.findRegion("water"), 4);
 			sprite.setFrameRate(2);
-			yAccel = -0.08f;
-			ySpeed = MathUtils.random(-2f, -4f);
-			xSpeed = MathUtils.random(-1.5f, 1.5f);
+			yAccel = -0.12f;
+			ySpeed = MathUtils.random(-2f);
+			xSpeed = MathUtils.random(-1f, 1f);
 			break;
 		case WOOD:
 			sprite.setImage(Consts.atlas.findRegion("wood"), 6);

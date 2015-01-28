@@ -10,46 +10,46 @@ import com.dvdfu.gij.components.GamepadComponent;
 import com.dvdfu.gij.components.GamepadComponent.Button;
 import com.dvdfu.gij.components.SpriteComponent;
 
-public class Player {
-	Level level;
+public class Player extends Unit {
 	enum Actions {
 		MOVE_LEFT, MOVE_RIGHT, AXE, WATER, SPROUT, NULL
 	}
-	boolean ready;
 	LinkedList<Actions> actionQueue;
 	Actions actionCurrent;
-	int timer;
-	int xCell;
+	
+	private int timer;
+	private int moveTime = 60;
+	private float cursorTime;
+	
 	public float x;
 	int player;
 	int fruit;
-	final int moveTime = 40;
-	float cursorTime;
 	boolean useless;
+	boolean ready;
 	
-	SpriteComponent sprite;
-	SpriteComponent iconUnknown;
-	SpriteComponent iconMoveLeft;
-	SpriteComponent iconMoveRight;
-	SpriteComponent iconSprout;
-	SpriteComponent iconPublic;
-	SpriteComponent iconSelected;
-	SpriteComponent iconWater;
-	SpriteComponent iconAxe;
+	private SpriteComponent sprite;
+	private SpriteComponent iconUnknown;
+	private SpriteComponent iconMoveLeft;
+	private SpriteComponent iconMoveRight;
+	private SpriteComponent iconSprout;
+	private SpriteComponent iconPublic;
+	private SpriteComponent iconSelected;
+	private SpriteComponent iconWater;
+	private SpriteComponent iconAxe;
 	
-	Button keyRight;
-	Button keyLeft;
-	Button keySprout;
-	Button keyAxe;
-	Button keyWater;
-	Button keyUndo;
-	Button keyReady;
+	private Button keyRight;
+	private Button keyLeft;
+	private Button keySprout;
+	private Button keyAxe;
+	private Button keyWater;
+	private Button keyUndo;
+	private Button keyReady;
 	
 	Text t;
 	Text fruitsText;
 	
 	public Player(Level level, int player) {
-		this.level = level;
+		super(level);
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
 		fruitsText = new Text();
@@ -96,17 +96,18 @@ public class Player {
 		}
 		t.text = "P" + player + " Ready!";
 		switch (level.state) {
-		case GARDEN_TEXT:
-			break;
 		case PERFORMING:
-			if (!ready) handleAction();
+			if (!ready) {
+				if (timer == 0) {
+					finishAction();
+				} else {
+					timer--;
+					handleAction();
+				}
+			}
 			break;
 		case QUEUING:
 			handleInput();
-			break;
-		case ROUND_TEXT:
-			break;
-		case VICTORY_TEXT:
 			break;
 		default:
 			break;
@@ -115,70 +116,34 @@ public class Player {
 	
 	public void handleInput() {
 		if (player == 1) {
-			if (Gdx.input.isKeyJustPressed(Input.Keys.S)) {
-				addMove(Actions.MOVE_RIGHT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.A)) {
-				addMove(Actions.MOVE_LEFT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-				addMove(Actions.SPROUT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-				addMove(Actions.AXE);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.D)) {
-				addMove(Actions.WATER);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
-				removeMove();
-			}
+			if (Gdx.input.isKeyJustPressed(Input.Keys.S)) { addMove(Actions.MOVE_RIGHT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.A)) { addMove(Actions.MOVE_LEFT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.E)) { addMove(Actions.SPROUT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.C)) { addMove(Actions.AXE); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.D)) { addMove(Actions.WATER); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) { removeMove(); }
 			if (doneMoves() && Gdx.input.isKeyJustPressed(Input.Keys.W)) {
 				ready = true;
 				Consts.ready.play();
 			}
 		} else {
-			if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-				addMove(Actions.MOVE_RIGHT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-				addMove(Actions.MOVE_LEFT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-				addMove(Actions.SPROUT);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.SLASH)) {
-				addMove(Actions.AXE);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON)) {
-				addMove(Actions.WATER);
-			}
-			if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
-				removeMove();
-			}
+			if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) { addMove(Actions.MOVE_RIGHT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) { addMove(Actions.MOVE_LEFT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.P)) { addMove(Actions.SPROUT); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.SLASH)) { addMove(Actions.AXE); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.SEMICOLON)) { addMove(Actions.WATER); }
+			if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) { removeMove(); }
 			if (doneMoves() && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
 				ready = true;
 				Consts.ready.play();
 			}
 		}
-		if (level.gp.keyPressed(player - 1, keyRight)) {
-			addMove(Actions.MOVE_RIGHT);
-		}
-		if (level.gp.keyPressed(player - 1, keyLeft)) {
-			addMove(Actions.MOVE_LEFT);
-		}
-		if (level.gp.keyPressed(player - 1, keySprout)) {
-			addMove(Actions.SPROUT);
-		}
-		if (level.gp.keyPressed(player - 1, keyAxe)) {
-			addMove(Actions.AXE);
-		}
-		if (level.gp.keyPressed(player - 1, keyWater)) {
-			addMove(Actions.WATER);
-		}
-		if (level.gp.keyPressed(player - 1, keyUndo)) {
-			removeMove();
-		}
+		if (level.gp.keyPressed(player - 1, keyRight)) { addMove(Actions.MOVE_RIGHT); }
+		if (level.gp.keyPressed(player - 1, keyLeft)) { addMove(Actions.MOVE_LEFT); }
+		if (level.gp.keyPressed(player - 1, keySprout)) { addMove(Actions.SPROUT); }
+		if (level.gp.keyPressed(player - 1, keyAxe)) { addMove(Actions.AXE); }
+		if (level.gp.keyPressed(player - 1, keyWater)) { addMove(Actions.WATER); }
+		if (level.gp.keyPressed(player - 1, keyUndo)) { removeMove(); }
 		if (doneMoves() && level.gp.keyPressed(player - 1, keyReady)) {
 			ready = true;
 			Consts.ready.play();
@@ -220,12 +185,12 @@ public class Player {
 				if (cell.owner.xCell != cell.xCell || cell.owner.equals(this)) {
 					useless = false;
 					int i = cell.xCell - 1;
-					while (i >= 0 && level.cells[i].state == Cell.State.TREE && level.cells[i].owner == cell.owner) {
+					while (i >= 0 && level.getState(i) == Cell.State.TREE && level.cells[i].owner == cell.owner) {
 						level.cells[i].slash();
 						i--;
 					}
 					i = cell.xCell + 1;
-					while (i < level.size && level.cells[i].state == Cell.State.TREE && level.cells[i].owner == cell.owner) {
+					while (i < level.size && level.getState(i) == Cell.State.TREE && level.cells[i].owner == cell.owner) {
 						level.cells[i].slash();
 						i++;
 					}
@@ -233,43 +198,15 @@ public class Player {
 			} else if (cell.state == Cell.State.TRUNK) {
 				useless = false;
 				int i = cell.xCell - 1;
-				while (i >= 0 && level.cells[i].state == Cell.State.TRUNK) {
+				while (i >= 0 && level.getState(i) == Cell.State.TRUNK) {
 					level.cells[i].slash();
 					i--;
 				}
 				i = cell.xCell + 1;
-				while (i < level.size && level.cells[i].state == Cell.State.TRUNK) {
+				while (i < level.size && level.getState(i) == Cell.State.TRUNK) {
 					level.cells[i].slash();
 					i++;
 				}
-			}
-			timer = moveTime;
-			break;
-		case WATER:
-			useless = true;
-			if (cell.state == Cell.State.SPROUT) {
-				useless = false;
-			}
-			Cell oCell;
-			if (cell.xCell > 0) {
-				oCell = level.cells[cell.xCell - 1];
-				if (oCell.state == Cell.State.SPROUT) {
-					useless = false;
-				}
-			}
-			if (cell.xCell < level.size - 1) {
-				oCell = level.cells[cell.xCell + 1];
-				if (oCell.state == Cell.State.SPROUT) {
-					useless = false;
-				}
-			}
-			timer = moveTime;
-			break;
-		case SPROUT:
-			useless = true;
-			if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
-				useless = false;
-				cell.setState(this, Cell.State.SPROUT);
 			}
 			timer = moveTime;
 			break;
@@ -285,6 +222,23 @@ public class Player {
 			level.switchPlayer();
 			ready = true;
 			break;
+		case SPROUT:
+			useless = true;
+			if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
+				useless = false;
+				cell.setState(this, Cell.State.SPROUT);
+			}
+			timer = moveTime;
+			break;
+		case WATER:
+			useless = true;
+			if (cell.state == Cell.State.SPROUT || 
+					level.getState(cell.xCell + 1) == Cell.State.SPROUT || 
+					level.getState(cell.xCell - 1) == Cell.State.SPROUT) {
+				useless = false;
+			}
+			timer = moveTime;
+			break;
 		default:
 			break;
 		}
@@ -293,101 +247,66 @@ public class Player {
 	public void handleAction() {
 		Cell cell = level.cells[xCell];
 		switch (actionCurrent) {
-		case WATER:
-			if (timer == 0) {
-				level.switchPlayer();
-				ready = true;
-			} else {
-				if (timer == moveTime / 2) {
-					if (!useless) {
-						Consts.tree.play();
-					}
-					if (cell.state == Cell.State.SPROUT) {
-						cell.setState(cell.owner, Cell.State.TREE);
-					}
-					Cell oCell;
-					if (cell.xCell > 0) {
-						oCell = level.cells[cell.xCell - 1];
-						if (oCell.state == Cell.State.SPROUT) {
-							oCell.setState(oCell.owner, Cell.State.TREE);
-						}
-					}
-					if (cell.xCell < level.size - 1) {
-						oCell = level.cells[cell.xCell + 1];
-						if (oCell.state == Cell.State.SPROUT) {
-							oCell.setState(oCell.owner, Cell.State.TREE);
-						}
-					}
-				}
-				if (timer % 5 == 0) {
-					long id = Consts.water.play();
-					Consts.water.setPitch(id, MathUtils.lerp(0.5f, 1f, 1f * timer / moveTime));
-				}
-				timer--;
-				for (int i = 0; i < 2; i++) {
-					Particle p = level.particlePool.obtain();
-					p.setType(Particle.Type.WATER);
-					p.x = x + 8 + MathUtils.random(16);
-					p.y = 192;
-					level.particles.add(p);
-				}
-			}
-			break;
-		case AXE:
-			if (timer == 0) {
-				level.switchPlayer();
-				ready = true;
-			} else {
-				timer--;
-				if (cell.state == Cell.State.TREE) {
-					for (int i = 0; i < 2; i++) {
-						Particle p = level.particlePool.obtain();
-						p.setType(player == 1 ? Particle.Type.LEAF_GREEN : Particle.Type.LEAF_RED);
-						p.x = x + 16;
-						p.y = 128;
-						level.particles.add(p);
-					}
-				}
-			}
-			break;
-		case SPROUT:
-			if (timer == 0) {
-				level.switchPlayer();
-				ready = true;
-			} else {
-				timer--;
-			}
-			break;
 		case MOVE_LEFT:
-			if (timer == 0) {
-				level.switchPlayer();
-				ready = true;
-				if (!useless) {
-					xCell--;
-					x = Consts.width / 2 + (xCell - level.size / 2f) * 32;
-				}
-			} else {
-				timer--;
-				if (!useless) {
-					float tx = MathUtils.lerp(xCell, xCell - 1, 1f * (moveTime - timer) / moveTime);
-					x = Consts.width / 2 + (tx - level.size / 2f) * 32;
-				}
+			if (!useless) {
+				float tx = MathUtils.lerp(xCell, xCell - 1, 1f * (moveTime - timer) / moveTime);
+				x = Consts.width / 2 + (tx - level.size / 2f) * 32;
 			}
 			break;
 		case MOVE_RIGHT:
-			if (timer == 0) {
-				level.switchPlayer();
-				ready = true;
+			if (!useless) {
+				float tx = MathUtils.lerp(xCell, xCell + 1, 1f * (moveTime - timer) / moveTime);
+				x = Consts.width / 2 + (tx - level.size / 2f) * 32;
+			}
+			break;
+		case WATER:
+			if (timer == moveTime / 2) {
 				if (!useless) {
-					xCell++;
-					x = Consts.width / 2 + (xCell - level.size / 2f) * 32;
+					Consts.tree.play();
 				}
-			} else {
-				timer--;
-				if (!useless) {
-					float tx = MathUtils.lerp(xCell, xCell + 1, 1f * (moveTime - timer) / moveTime);
-					x = Consts.width / 2 + (tx - level.size / 2f) * 32;
+				if (cell.state == Cell.State.SPROUT) {
+					cell.setState(cell.owner, Cell.State.TREE);
 				}
+				if (level.getState(cell.xCell - 1) == Cell.State.SPROUT) {
+					Cell cell2 = level.cells[cell.xCell - 1];
+					cell2.setState(cell2.owner, Cell.State.TREE);
+				}
+				if (level.getState(cell.xCell + 1) == Cell.State.SPROUT) {
+					Cell cell2 = level.cells[cell.xCell + 1];
+					cell2.setState(cell2.owner, Cell.State.TREE);
+				}
+			}
+			if (timer % 5 == 0) {
+				long id = Consts.water.play();
+				Consts.water.setPitch(id, MathUtils.lerp(0.5f, 1f, 1f * timer / moveTime));
+			}
+			for (int i = 0; i < 2; i++) {
+				Particle p = level.particlePool.obtain();
+				p.setType(Particle.Type.WATER);
+				p.x = x + 16;// + MathUtils.random(16);
+				p.y = 208;
+				level.particles.add(p);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void finishAction() {
+		level.switchPlayer();
+		ready = true;
+		switch (actionCurrent) {
+		case MOVE_LEFT:
+			if (!useless) {
+				xCell--;
+				x = Consts.width / 2 + (xCell - level.size / 2f) * 32;
+			}
+			break;
+		case MOVE_RIGHT:
+			if (!useless) {
+				xCell++;
+				x = Consts.width / 2 + (xCell - level.size / 2f) * 32;
 			}
 			break;
 		default:

@@ -4,21 +4,21 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Cell extends Unit {
-	enum State {
+	public enum State {
 		EMPTY, SPROUT, TREE, TRUNK
 	}
-	State state;
-	Player owner;
+	public State state;
+	public Player owner;
+	public boolean golden;
 	
-	SpriteComponent soil;
-	SpriteComponent soilTop;
-	SpriteComponent sprout;
-	SpriteComponent tree;
-	SpriteComponent trunk;
-	SpriteComponent slash;
-	
-	boolean drawSlash;
-	boolean golden;
+	private SpriteComponent soil;
+	private SpriteComponent soilTop;
+	private SpriteComponent sprout;
+	private SpriteComponent tree;
+	private SpriteComponent trunk;
+	private SpriteComponent slash;
+
+	private boolean drawSlash;
 	
 	public Cell(Level level, int xCell) {
 		super(level);
@@ -64,6 +64,15 @@ public class Cell extends Unit {
 						p.x = xDraw() + 16;
 						p.y = 96;
 						level.particles.add(p);
+					}
+					if (state == State.TREE) {
+						for (int i = 0; i < 40; i++) {
+							Particle p = level.particlePool.obtain();
+							p.setType(owner.player == 1 ? Particle.Type.LEAF_GREEN : Particle.Type.LEAF_RED);
+							p.x = xDraw() + 16;
+							p.y = 128;
+							level.particles.add(p);
+						}
 					}
 				}
 				if (state == State.TREE) {
@@ -136,6 +145,21 @@ public class Cell extends Unit {
 		case TRUNK:
 			break;
 		default:
+			break;
+		}
+	}
+	
+	public void applyAction(Player player, Player.Actions action) {
+		switch (action) {
+		case AXE:
+			break;
+		case MOVE_LEFT:
+		case MOVE_RIGHT:
+		case NULL:
+			break;
+		case SPROUT:
+			break;
+		case WATER:
 			break;
 		}
 	}
