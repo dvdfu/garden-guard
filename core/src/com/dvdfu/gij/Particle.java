@@ -8,11 +8,12 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 import com.dvdfu.gij.components.SpriteComponent;
 
 public class Particle implements Poolable {
-	public enum Type { NULL, WOOD, LEAF_GREEN, LEAF_RED, WATER, STAR }
+	public enum Type { NULL, WOOD, LEAF_GREEN, LEAF_RED, WATER, SEED, STAR }
 	public Type type;
 	public float x, y;
 	public boolean dead;
-
+	public Player owner;
+	
 	private SpriteComponent sprite;
 	private float xSpeed, ySpeed, yAccel;
 	private float timer;
@@ -31,7 +32,11 @@ public class Particle implements Poolable {
 				dead = true;
 			}
 			break;
-		case NULL:
+		case SEED:
+			if (y + ySpeed - sprite.getHeight() / 2 < 96) {
+				owner.level.cells[owner.xCell].setState(owner, Cell.State.SPROUT);
+				dead = true;
+			}
 			break;
 		case STAR:
 			if (timer == 180) {
@@ -85,7 +90,11 @@ public class Particle implements Poolable {
 			ySpeed = MathUtils.random(2f);
 			xSpeed = MathUtils.random(-0.5f, 1f);
 			break;
-		case NULL:
+		case SEED:
+			sprite = new SpriteComponent(Consts.atlas.findRegion("seed"));
+			yAccel = -0.12f;
+			ySpeed = 0;
+			xSpeed = 0;
 			break;
 		case STAR:
 			sprite = new SpriteComponent(Consts.atlas.findRegion("sparkle"), 16);

@@ -158,6 +158,13 @@ player
   orig: 16, 16
   offset: 0, 0
   index: -1
+seed
+  rotate: false
+  xy: 68, 8
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
 sky
   rotate: false
   xy: 881, 375

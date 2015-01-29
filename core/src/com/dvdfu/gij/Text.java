@@ -14,10 +14,7 @@ public class Text {
 	float x, y;
 
 	public Text() {
-		font = new BitmapFont();
-		color = new Color(1, 1, 1, 1);
-		font.setColor(color);
-		bordered = true;
+		this("arcade");
 	}
 
 	public Text(String file) {

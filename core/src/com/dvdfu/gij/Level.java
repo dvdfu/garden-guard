@@ -1,5 +1,7 @@
 package com.dvdfu.gij;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -40,21 +42,15 @@ public class Level {
 	public Level() {
 		p1 = new Player(this, 1);
 		p2 = new Player(this, 2);
-		pT = p1;
-		screenLabel = new Text("8b");
+		screenLabel = new Text();
 		screenLabel.centered = true;
-		// screenLabel.font.scale(1);
-		// screenLabel.bordered = false;
-		incLabel = new Text("8b");
+		incLabel = new Text();
 		incLabel.centered = true;
-		instrLabel = new Text("8b");
+		instrLabel = new Text();
 		cells = new Cell[size];
 		for (int i = 0; i < size; i++) {
 			cells[i] = new Cell(this, i);
 		}
-		cells[0].setState(p1, Cell.State.SPROUT);
-		cells[size - 1].setState(p2, Cell.State.SPROUT);
-		setState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
 		particles = new Array<Particle>();
 		particlePool = new Pool<Particle>() {
@@ -69,6 +65,23 @@ public class Level {
 		buttonDPad = new SpriteComponent(Consts.atlas.findRegion("button_dpad"));
 		buttonL = new SpriteComponent(Consts.atlas.findRegion("button_l1"));
 		buttonR = new SpriteComponent(Consts.atlas.findRegion("button_r1"));
+		
+		restart();
+	}
+	
+	public void restart() {
+		pT = p1;
+		p1.fruit = 0;
+		p2.fruit = 0;
+		p1.fruitsText.text = "" + p1.fruit;
+		p2.fruitsText.text = "" + p2.fruit;
+		turn = 0;
+		for (int i = 0; i < size; i++) {
+			cells[i].setState(null, Cell.State.EMPTY);
+		}
+		cells[0].setState(p1, Cell.State.SPROUT);
+		cells[size - 1].setState(p2, Cell.State.SPROUT);
+		setState(State.ROUND_TEXT);
 	}
 	
 	public void setState(State state) {
@@ -114,7 +127,7 @@ public class Level {
 			if (turn == turnWin) {
 				screenLabel.text = "FINAL ROUND!";
 			} else {
-				screenLabel.text = "ROUND " + turn + " of " + turnWin;
+				screenLabel.text = "Round " + turn + " of " + turnWin;
 			}
 			break;
 		case VICTORY_TEXT:
@@ -163,6 +176,9 @@ public class Level {
 			handleTimer();
 			break;
 		case VICTORY_TEXT:
+			if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+				restart();
+			}
 			break;
 		default:
 			break;
@@ -276,11 +292,20 @@ public class Level {
 			} else {
 				screenLabel.color.set(1, 0.7f, 0.5f, 1);
 			}
-			screenLabel.text = "P" + pT.player + " used " + pT.actionCurrent.toString();
+			String actionString = "";
+			switch (pT.actionCurrent) {
+			case AXE: actionString += "swung an axe!"; break;
+			case MOVE_LEFT: actionString += "moved left!"; break;
+			case MOVE_RIGHT: actionString += "moved right!"; break;
+			case SPROUT: actionString += "planted a seed!"; break;
+			case WATER: actionString += "watered the soil!"; break;
+			default: break;
+			}
+			screenLabel.text = "P" + pT.player + " " + actionString;
 			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
 			screenLabel.color.set(1, 1, 1, 1);
 			if (pT.useless) {
-				screenLabel.text = "but it was useless";
+				screenLabel.text = "...but it was useless!";
 				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 112);
 			}
 		}

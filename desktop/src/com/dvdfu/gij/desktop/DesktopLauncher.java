@@ -8,7 +8,7 @@ import com.dvdfu.gij.MainGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		TexturePacker.process("unpacked/", "/home/david/workspace/gij/gij/core/assets/img", "images");
+		TexturePacker.process("unpacked/", "/home/david/workspace/gij/winter-gi-jam/core/assets/img", "images");
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 //		config.fullscreen = true;
 		config.width = Consts.width * 2;

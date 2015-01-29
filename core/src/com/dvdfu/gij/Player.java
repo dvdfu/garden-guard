@@ -52,10 +52,10 @@ public class Player extends Unit {
 		super(level);
 		this.player = player;
 		sprite = new SpriteComponent(Consts.atlas.findRegion("hand"));
-		fruitsText = new Text("8b");
+		fruitsText = new Text();
 		fruitsText.centered = true;
 		fruitsText.text = "0";
-		readyText = new Text("8b");
+		readyText = new Text();
 		readyText.centered = true;
 		if (player == 1) {
 			sprite.setColor(0.5f, 1, 0.7f);
@@ -113,6 +113,17 @@ public class Player extends Unit {
 	}
 	
 	public void handleInput() {
+		if (actionQueue.size() < level.movesThisTurn() / 2) {
+			if (player == 1) {
+				if (actionQueue.size() > level.p2.actionQueue.size()) {
+					return;
+				}
+			} else {
+				if (actionQueue.size() > level.p1.actionQueue.size()) {
+					return;
+				}
+			}
+		}
 		if (player == 1) {
 			if (Gdx.input.isKeyJustPressed(Input.Keys.S)) { addMove(Actions.MOVE_RIGHT); }
 			if (Gdx.input.isKeyJustPressed(Input.Keys.A)) { addMove(Actions.MOVE_LEFT); }
@@ -211,8 +222,16 @@ public class Player extends Unit {
 		case SPROUT:
 			useless = true;
 			if (cell.state != Cell.State.TREE && cell.state != Cell.State.TRUNK) {
-				useless = false;
-				cell.setState(this, Cell.State.SPROUT);
+				if (cell.state != Cell.State.SPROUT || !cell.owner.equals(this)) {
+					useless = false;
+				}
+				Particle p = level.particlePool.obtain();
+				p.setType(Particle.Type.SEED);
+				p.owner = this;
+				p.x = x + 16;
+				p.y = 208;
+				level.particles.add(p);
+				Consts.drop.play();
 			}
 			timer = moveTime;
 			break;

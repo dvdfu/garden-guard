@@ -15,19 +15,19 @@ public class Cloud {
 			sprite = new SpriteComponent(Consts.atlas.findRegion("cloud1"));
 			xSpeed = MathUtils.random(0.2f, 0.3f);
 			x = r;
-			y = 228;
+			y = 236;
 			break;
 		case 2:
 			sprite = new SpriteComponent(Consts.atlas.findRegion("cloud2"));
 			xSpeed = MathUtils.random(0.1f, 0.2f);
 			x = r * 2;
-			y = 212;
+			y = 220;
 			break;
 		case 3:
 			sprite = new SpriteComponent(Consts.atlas.findRegion("cloud3"));
 			xSpeed = MathUtils.random(0.05f, 0.1f);
 			x = r * 3;
-			y = 196;
+			y = 204;
 			break;
 		}
 	}
