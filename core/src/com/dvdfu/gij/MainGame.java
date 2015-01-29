@@ -68,7 +68,7 @@ public class MainGame extends Game {
 		}
 		fb.end();
 		fbBatch.begin();
-		fbBatch.draw(fb.getColorBufferTexture(), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
+		fbBatch.draw(fb.getColorBufferTexture(), 0, 0, fb.getWidth(), fb.getHeight(), 0, 0, 1, 1);
 		fbBatch.end();
 		if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
 			Gdx.app.exit();
@@ -77,6 +77,8 @@ public class MainGame extends Game {
 
 	public void resize(int width, int height) {
 		super.resize(width, height);
+		Consts.width = width / 2;
+		Consts.height = height / 2;
 	}
 
 	public void pause() {}

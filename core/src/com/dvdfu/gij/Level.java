@@ -1,5 +1,7 @@
 package com.dvdfu.gij;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -12,7 +14,7 @@ public class Level {
 	}
 	public State state;
 	int stateTimer;
-	final int width = 9;
+	final int size = 9;
 	int turnWin = 6;
 	int turn;
 	int turnMove;
@@ -25,14 +27,8 @@ public class Level {
 	Text incLabel;
 	Text instrLabel;
 	
-	Array<Water> water;
-	Pool<Water> waterPool;
-	Array<Leaf> leaves;
-	Pool<Leaf> leafPool;
-	Array<Wood> wood;
-	Pool<Wood> woodPool;
-	Array<Star> stars;
-	Pool<Star> starPool;
+	Array<Particle> particles;
+	Pool<Particle> particlePool;
 	
 	SpriteComponent buttonTri;
 	SpriteComponent buttonCir;
@@ -46,46 +42,20 @@ public class Level {
 	public Level() {
 		p1 = new Player(this, 1);
 		p2 = new Player(this, 2);
-		pT = p1;
 		screenLabel = new Text();
 		screenLabel.centered = true;
-		incLabel = new Text("+1");
+		incLabel = new Text();
 		incLabel.centered = true;
-		incLabel.font = Consts.SmallFont;
 		instrLabel = new Text();
-		instrLabel.font = Consts.SmallFont;
-		// screenLabel.font.scale(1);
-		// screenLabel.bordered = false;
-		cells = new Cell[width];
-		for (int i = 0; i < width; i++) {
+		cells = new Cell[size];
+		for (int i = 0; i < size; i++) {
 			cells[i] = new Cell(this, i);
 		}
-		cells[0].setState(p1, Cell.State.SPROUT);
-		cells[width - 1].setState(p2, Cell.State.SPROUT);
-		switchState(State.ROUND_TEXT);
 		gp = new GamepadComponent();
-		water = new Array<Water>();
-		waterPool = new Pool<Water>() {
-			protected Water newObject() {
-				return new Water();
-			}
-		};
-		leaves = new Array<Leaf>();
-		leafPool = new Pool<Leaf>() {
-			protected Leaf newObject() {
-				return new Leaf();
-			}
-		};
-		wood = new Array<Wood>();
-		woodPool = new Pool<Wood>() {
-			protected Wood newObject() {
-				return new Wood();
-			}
-		};
-		stars = new Array<Star>();
-		starPool = new Pool<Star>() {
-			protected Star newObject() {
-				return new Star();
+		particles = new Array<Particle>();
+		particlePool = new Pool<Particle>() {
+			protected Particle newObject() {
+				return new Particle();
 			}
 		};
 		
@@ -95,20 +65,37 @@ public class Level {
 		buttonDPad = new SpriteComponent(Consts.atlas.findRegion("button_dpad"));
 		buttonL = new SpriteComponent(Consts.atlas.findRegion("button_l1"));
 		buttonR = new SpriteComponent(Consts.atlas.findRegion("button_r1"));
+		
+		restart();
 	}
 	
-	public void switchState(State state) {
+	public void restart() {
+		pT = p1;
+		p1.fruit = 0;
+		p2.fruit = 0;
+		p1.fruitsText.text = "" + p1.fruit;
+		p2.fruitsText.text = "" + p2.fruit;
+		turn = 0;
+		for (int i = 0; i < size; i++) {
+			cells[i].setState(null, Cell.State.EMPTY);
+		}
+		cells[0].setState(p1, Cell.State.SPROUT);
+		cells[size - 1].setState(p2, Cell.State.SPROUT);
+		setState(State.ROUND_TEXT);
+	}
+	
+	public void setState(State state) {
 		this.state = state;
 		switch (state) {
 		case COUNTING:
 			Consts.count.play();
 			boolean fruit = false;
 			Cell cell;
-			for (int i = 0; i < width; i++) {
+			for (int i = 0; i < size; i++) {
 				cell = cells[i];
 				if (cell.state == Cell.State.TREE || cell.state == Cell.State.SPROUT) {
 					fruit = true;
-					cell.owner.fruit += cell.getValue();
+					cell.owner.fruit += cell.getPointValue();
 				}
 			}
 			p1.fruitsText.text = "" + p1.fruit;
@@ -117,9 +104,9 @@ public class Level {
 				stateTimer = 120;
 			} else {
 				if (turn == turnWin) {
-					switchState(State.VICTORY_TEXT);
+					setState(State.VICTORY_TEXT);
 				} else {
-					switchState(State.ROUND_TEXT);
+					setState(State.ROUND_TEXT);
 				}
 			}
 			break;
@@ -131,8 +118,6 @@ public class Level {
 			stateTimer = 0;
 			turnMove = 0;
 			break;
-		case QUEUING:
-			break;
 		case ROUND_TEXT:
 			Consts.round.play();
 			turn++;
@@ -142,7 +127,7 @@ public class Level {
 			if (turn == turnWin) {
 				screenLabel.text = "FINAL ROUND!";
 			} else {
-				screenLabel.text = "ROUND " + turn + " / " + turnWin;
+				screenLabel.text = "Round " + turn + " of " + turnWin;
 			}
 			break;
 		case VICTORY_TEXT:
@@ -172,11 +157,11 @@ public class Level {
 			break;
 		case PERFORMING:
 			if (turnMove >= movesThisTurn() * 2 && p1.ready && p2.ready) {
-				switchState(State.COUNTING);
+				setState(State.COUNTING);
 				return;
 			}
 			if (pT.ready) {
-				if (turnMove / 2 > pT.actionQueue.size()) {
+				if (turnMove >= pT.actionQueue.size() * 2) {
 					switchPlayer();
 				} else {
 					pT.startAction(pT.actionQueue.get(turnMove / 2));
@@ -185,12 +170,15 @@ public class Level {
 			}
 			break;
 		case QUEUING:
-			if (p1.ready && p2.ready) switchState(State.GARDEN_TEXT);
+			if (p1.ready && p2.ready) setState(State.GARDEN_TEXT);
 			break;
 		case ROUND_TEXT:
 			handleTimer();
 			break;
 		case VICTORY_TEXT:
+			if (Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+				restart();
+			}
 			break;
 		default:
 			break;
@@ -209,22 +197,16 @@ public class Level {
 		switch (state) {
 		case COUNTING:
 			if (turn == turnWin) {
-				switchState(State.VICTORY_TEXT);
+				setState(State.VICTORY_TEXT);
 			} else {
-				switchState(State.ROUND_TEXT);
+				setState(State.ROUND_TEXT);
 			}
 			break;
 		case GARDEN_TEXT:
-			switchState(State.PERFORMING);
-			break;
-		case PERFORMING:
-			break;
-		case QUEUING:
+			setState(State.PERFORMING);
 			break;
 		case ROUND_TEXT:
-			switchState(State.QUEUING);
-			break;
-		case VICTORY_TEXT:
+			setState(State.QUEUING);
 			break;
 		default:
 			break;
@@ -232,47 +214,27 @@ public class Level {
 	}
 
 	public void update() {
-		handleState();
-		if (celebration) {
-			Star s = starPool.obtain();
-			s.x = Consts.width / 2;
-			s.y = Consts.height / 2 + 128;
-			stars.add(s);
-		}
-		for (int i = 0; i < water.size; i++) {
-			water.get(i).update();
-			if (water.get(i).dead) {
-				waterPool.free(water.get(i));
-				water.removeIndex(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < leaves.size; i++) {
-			leaves.get(i).update();
-			if (leaves.get(i).dead) {
-				leafPool.free(leaves.get(i));
-				leaves.removeIndex(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < wood.size; i++) {
-			wood.get(i).update();
-			if (wood.get(i).dead) {
-				woodPool.free(wood.get(i));
-				wood.removeIndex(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < stars.size; i++) {
-			stars.get(i).update();
-			if (stars.get(i).dead) {
-				starPool.free(stars.get(i));
-				stars.removeIndex(i);
-				i--;
-			}
-		}
 		p1.update();
 		p2.update();
+		handleState();
+		if (celebration) {
+			Particle p = particlePool.obtain();
+			p.setType(Particle.Type.STAR);
+			p.x = Consts.width / 2;
+			p.y = Consts.height / 2 + 128;
+			particles.add(p);
+		}
+		for (int i = 0; i < particles.size; i++) {
+			particles.get(i).update();
+			if (particles.get(i).dead) {
+				particlePool.free(particles.get(i));
+				particles.removeIndex(i);
+				i--;
+			}
+		}
+		for (int i = 0; i < size; i++) {
+			cells[i].update();
+		}
 		gp.update();
 	}
 	
@@ -285,20 +247,11 @@ public class Level {
 	}
 
 	public void draw(SpriteBatch batch) {
-		for (int i = 0; i < width; i++) {
+		for (int i = 0; i < size; i++) {
 			cells[i].draw(batch);
 		}
-		for (Leaf l : leaves) {
-			l.draw(batch);
-		}
-		for (Wood w : wood) {
-			w.draw(batch);
-		}
-		for (Water w : water) {
-			w.draw(batch);
-		}
-		for (Star w : stars) {
-			w.draw(batch);
+		for (Particle p : particles) {
+			p.draw(batch);
 		}
 		p1.draw(batch);
 		p2.draw(batch);
@@ -333,23 +286,31 @@ public class Level {
 				state == State.ROUND_TEXT ||
 				state == State.VICTORY_TEXT) {
 			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
-		}
-		if (state == State.PERFORMING) {
+		} else if (state == State.PERFORMING) {
 			if (pT.equals(p1)) {
 				screenLabel.color.set(0.5f, 1, 0.7f, 1);
 			} else {
 				screenLabel.color.set(1, 0.7f, 0.5f, 1);
 			}
-			screenLabel.text = "P" + pT.player + " used " + pT.actionCurrent.toString();
+			String actionString = "";
+			switch (pT.actionCurrent) {
+			case AXE: actionString += "swung an axe!"; break;
+			case MOVE_LEFT: actionString += "moved left!"; break;
+			case MOVE_RIGHT: actionString += "moved right!"; break;
+			case SPROUT: actionString += "planted a seed!"; break;
+			case WATER: actionString += "watered the soil!"; break;
+			default: break;
+			}
+			screenLabel.text = "P" + pT.player + " " + actionString;
 			screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 128);
 			screenLabel.color.set(1, 1, 1, 1);
 			if (pT.useless) {
-				screenLabel.text = "(it was useless)";
+				screenLabel.text = "...but it was useless!";
 				screenLabel.draw(batch, Consts.width / 2, Consts.height / 2 + 112);
 			}
 		}
 		if (state == State.COUNTING) {
-			for (int i = 0; i < width; i++) {
+			for (int i = 0; i < size; i++) {
 				Cell c = cells[i];
 				if (c.state == Cell.State.TREE || c.state == Cell.State.SPROUT) {
 					if (c.owner.equals(p1)) {
@@ -357,11 +318,17 @@ public class Level {
 					} else {
 						incLabel.color.set(1, 0.7f, 0.5f, 1);
 					}
-					incLabel.text = "+" + c.getValue();
-					incLabel.draw(batch, Consts.width / 2 + (i - width / 2) * 32, 176 - stateTimer / 6);
+					int yy = c.state == Cell.State.TREE ? 176 : 128;
+					incLabel.text = "+" + c.getPointValue();
+					incLabel.draw(batch, Consts.width / 2 + (i - size / 2) * 32, yy - stateTimer / 6);
 				}
 			}
 		}
+	}
+	
+	public Cell.State getState(int xCell) {
+		if (xCell < 0 || xCell >= size) return Cell.State.EMPTY;
+		return cells[xCell].state;
 	}
 	
 	public int movesThisTurn() {

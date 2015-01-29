@@ -1,5 +1,6 @@
 package com.dvdfu.gij;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -13,12 +14,11 @@ public class Text {
 	float x, y;
 
 	public Text() {
-		this("");
+		this("arcade");
 	}
 
-	public Text(String text) {
-		this.text = text;
-		font = Consts.BigFont;
+	public Text(String file) {
+		font = new BitmapFont(Gdx.files.internal("data/" + file + ".fnt"));
 		color = new Color(1, 1, 1, 1);
 		font.setColor(color);
 		bordered = true;
